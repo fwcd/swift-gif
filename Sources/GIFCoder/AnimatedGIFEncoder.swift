@@ -1,6 +1,6 @@
 import Foundation
 import Logging
-import D2Utils
+import Utils
 
 fileprivate let log = Logger(label: "GIFCoder.AnimatedGIFEncoder")
 

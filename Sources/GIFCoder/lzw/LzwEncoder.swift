@@ -1,5 +1,5 @@
 // Based on http://giflib.sourceforge.net/whatsinagif/lzw_image_data.html
-import D2Utils
+import Utils
 
 fileprivate let maxCodeTableCount: Int = 1 << 12
 
