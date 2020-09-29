@@ -1,4 +1,5 @@
 import Foundation
+import Graphics
 
 public struct AnimatedGIF {
     public let width: Int

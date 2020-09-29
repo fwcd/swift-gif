@@ -1,3 +1,5 @@
+import Graphics
+
 /**
  * A finite color palette generated from an image.
  */

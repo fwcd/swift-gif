@@ -1,6 +1,7 @@
 // Based on https://www.cubic.org/docs/octree.htm
 
 import Utils
+import Graphics
 import Logging
 
 fileprivate let log = Logger(label: "GIFCoder.OctreeQuantization")

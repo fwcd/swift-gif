@@ -1,4 +1,5 @@
 import Foundation
+import Graphics
 
 /** Color channels, assuming RGB colors. */
 fileprivate let CHANNELS = 3
