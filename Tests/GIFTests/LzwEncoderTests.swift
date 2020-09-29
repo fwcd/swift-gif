@@ -1,5 +1,5 @@
 import XCTest
-@testable import GIFCoder
+@testable import GIF
 
 final class LzwEncoderTests: XCTestCase {
     static var allTests = [

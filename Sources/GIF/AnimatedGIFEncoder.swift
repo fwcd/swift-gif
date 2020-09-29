@@ -3,7 +3,7 @@ import Logging
 import Graphics
 import Utils
 
-fileprivate let log = Logger(label: "GIFCoder.AnimatedGIFEncoder")
+fileprivate let log = Logger(label: "GIF.AnimatedGIFEncoder")
 
 public let gifColorCount = 256
 public let gifNonTransparentColorCount = gifColorCount - 1

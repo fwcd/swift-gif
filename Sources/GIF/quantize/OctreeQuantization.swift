@@ -4,7 +4,7 @@ import Utils
 import Graphics
 import Logging
 
-fileprivate let log = Logger(label: "GIFCoder.OctreeQuantization")
+fileprivate let log = Logger(label: "GIF.OctreeQuantization")
 fileprivate let maxDepth = 8 // bits in a byte (of each color channel)
 
 /**

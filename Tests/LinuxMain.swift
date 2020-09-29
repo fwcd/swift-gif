@@ -1,7 +1,7 @@
 import XCTest
 
-import GIFCoderTests
+import GIFTests
 
 var tests = [XCTestCaseEntry]()
-tests += GIFCoderTests.allTests()
+tests += GIFTests.allTests()
 XCTMain(tests)
