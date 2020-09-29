@@ -15,7 +15,8 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.0"),
-        .package(url: "https://github.com/fwcd/swift-utils.git", from: "1.0.0")
+        .package(url: "https://github.com/fwcd/swift-utils.git", from: "1.0.0"),
+        .package(url: "https://github.com/fwcd/swift-graphics.git", .revision("5e5e5240ca7ff0a849c7cf6c3d57904af059f68a"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -23,8 +24,9 @@ let package = Package(
         .target(
             name: "GIFCoder",
             dependencies: [
+                .product(name: "Logging", package: "swift-log"),
                 .product(name: "Utils", package: "swift-utils"),
-                .product(name: "Logging", package: "swift-log")
+                .product(name: "Graphics", package: "swift-graphics")
             ]
         ),
         .testTarget(
