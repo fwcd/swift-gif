@@ -39,7 +39,7 @@ struct LzwEncoder {
 
     public mutating func finishEncoding(into data: inout BitData) {
         write(code: table[indexBuffer]!, into: &data)
-        write(code: table.endOfInfoCode, into: &data)
+        write(code: table.meta.endOfInfoCode, into: &data)
     }
 
     private mutating func write(code: Int, into data: inout BitData) {

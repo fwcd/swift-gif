@@ -1,7 +1,6 @@
 // Based on http://giflib.sourceforge.net/whatsinagif/lzw_image_data.html
 
 struct LzwEncoderTable: CustomStringConvertible {
-    private let colorCount: Int
     // Stores the mapping from multiple indices to a single code
     private var entries: [[Int]: Int] = [:]
     public private(set) var meta: LzwTableMeta
