@@ -7,10 +7,8 @@ import Logging
 fileprivate let log = Logger(label: "GIF.OctreeQuantization")
 fileprivate let maxDepth = 8 // bits in a byte (of each color channel)
 
-/**
- * A quantization that uses an octree
- * in RGB color space.
- */
+/// A quantization that uses an octree
+/// in RGB color space.
 public struct OctreeQuantization: ColorQuantization {
     private class OctreeNode: Hashable, CustomStringConvertible {
         private var red: UInt = 0
@@ -93,10 +91,8 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        /**
-        * "Mixes" all child nodes in this node. This method assumes all children are leaves
-        * and returns the number of reduced leaves.
-        */
+        /// "Mixes" all child nodes in this node. This method assumes all children are leaves
+        /// and returns the number of reduced leaves.
         @discardableResult
         func reduce() -> Int {
             var reduced = 0
@@ -127,7 +123,7 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        /** Performs a pre-order traversal on this octree. */
+        /// Performs a pre-order traversal on this octree.
         func walk(onNode: (OctreeNode) -> Void) {
             onNode(self)
             for child in childs {
@@ -140,11 +136,9 @@ public struct OctreeQuantization: ColorQuantization {
         func hash(into hasher: inout Hasher) { hasher.combine(ObjectIdentifier(self)) }
     }
 
-    /**
-    * A wrapper around a reducible octree node that
-    * defines comparability and equatability via the
-    * sum of child refs.
-    */
+    /// A wrapper around a reducible octree node that
+    /// defines comparability and equatability via the
+    /// sum of child refs.
     private struct QueuedReducibleNode: Comparable {
         let inner: OctreeNode
 

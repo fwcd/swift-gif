@@ -1,10 +1,8 @@
 import Foundation
 
-/**
- * Enables reading and writing chunks of individual
- * bits in a byte buffer. Note that bits are written
- * from **right (LSB) to left (MSB)** inside a byte.
- */
+/// Enables reading and writing chunks of individual
+/// bits in a byte buffer. Note that bits are written
+/// from **right (LSB) to left (MSB)** inside a byte.
 struct BitData {
     public private(set) var bytes: [UInt8]
     private var byteIndex: Int = 0
@@ -24,7 +22,7 @@ struct BitData {
         self.bytes = bytes
     }
 
-    /** Writes the rightmost `bitCount` bits from the value. **/
+    /// Writes the rightmost `bitCount` bits from the value.
     public mutating func write(_ value: UInt, bitCount initialBitCount: UInt) {
         var bitCount = initialBitCount
         while bitCount > 0 {

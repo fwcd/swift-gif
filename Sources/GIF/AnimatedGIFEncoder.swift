@@ -11,22 +11,18 @@ fileprivate let colorChannels = 3
 fileprivate let transparentColorIndex: UInt8 = 0xFF
 fileprivate let colorResolution: UInt8 = 0b111 // Between 0 and 8 (exclusive) -> Will be interpreted as (bits per pixel - 1)
 
-/**
- * A GIF-encoder that supports
- * (looping) animations written in
- * pure Swift.
- */
+/// A GIF-encoder that supports
+/// (looping) animations written in
+/// pure Swift.
 public struct AnimatedGIFEncoder {
     private let width: UInt16
     private let height: UInt16
     private let globalQuantization: ColorQuantization?
     public private(set) var data: Data
 
-    /**
-    * Creates a new AnimatedGIF with the specified
-    * dimensions. A loop count of 0 means infinite
-    * loops.
-    */
+    /// Creates a new AnimatedGIF with the specified
+    /// dimensions. A loop count of 0 means infinite
+    /// loops.
     public init(width: UInt16, height: UInt16, loopCount: UInt16 = 0, globalQuantization: ColorQuantization? = nil) {
         data = Data()
         self.width = width
@@ -65,11 +61,9 @@ public struct AnimatedGIFEncoder {
             set(newValue) { rawValue = rawValue | (newValue << (7 - bitIndex)) }
         }
 
-        /**
-        * Appends a value to the bitfield
-        * by converting it to little-endian
-        * and masking it.
-        */
+        /// Appends a value to the bitfield
+        /// by converting it to little-endian
+        /// and masking it.
         mutating func append(_ appended: UInt8, bits: Int) {
             assert(bitIndex < 8)
             let mask: UInt8 = (1 << UInt8(bits)) - 1
@@ -229,10 +223,8 @@ public struct AnimatedGIFEncoder {
         append(byte: 0x00) // Block terminator
     }
 
-    /**
-    * Appends a frame with the specified delay time
-    * (in hundrets of a second).
-    */
+    /// Appends a frame with the specified delay time
+    /// (in hundrets of a second).
     public mutating func append(frame: Image, delayTime: UInt16, disposalMethod: DisposalMethod = .clearCanvas) throws {
         var localQuantization: ColorQuantization? = nil
 
@@ -243,10 +235,8 @@ public struct AnimatedGIFEncoder {
         try append(frame: frame, localQuantization: localQuantization, delayTime: delayTime, disposalMethod: disposalMethod)
     }
 
-    /**
-    * Appends a frame with the specified quantizer
-    * and delay time (in hundrets of a second).
-    */
+    /// Appends a frame with the specified quantizer
+    /// and delay time (in hundrets of a second).
     public mutating func append(frame: Image, localQuantization: ColorQuantization? = nil, delayTime: UInt16, disposalMethod: DisposalMethod = .clearCanvas) throws {
         let frameWidth = UInt16(frame.width)
         let frameHeight = UInt16(frame.height)
