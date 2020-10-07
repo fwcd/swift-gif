@@ -29,5 +29,19 @@ final class BitDataTests: XCTestCase {
 
         var source2 = sink2.atHead
         XCTAssertEqual(source2.read(bitCount: 16), 0xABCD)
+
+        var sink3 = BitData()
+        sink3.write(4, bitCount: 3)
+        sink3.write(1, bitCount: 3)
+        sink3.write(6, bitCount: 3)
+        sink3.write(2, bitCount: 3)
+        sink3.write(9, bitCount: 4)
+
+        var source3 = sink3.atHead
+        XCTAssertEqual(source3.read(bitCount: 3), 4)
+        XCTAssertEqual(source3.read(bitCount: 3), 1)
+        XCTAssertEqual(source3.read(bitCount: 3), 6)
+        XCTAssertEqual(source3.read(bitCount: 3), 2)
+        XCTAssertEqual(source3.read(bitCount: 4), 9)
     }
 }

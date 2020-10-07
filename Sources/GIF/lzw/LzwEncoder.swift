@@ -34,7 +34,6 @@ struct LzwEncoder {
             }
             indexBuffer = [index]
         }
-        log.trace("Encoded \(index), table: \(table) at code size \(table.meta.codeSize)")
     }
 
     public mutating func finishEncoding(into data: inout BitData) {
@@ -43,6 +42,7 @@ struct LzwEncoder {
     }
 
     private mutating func write(code: Int, into data: inout BitData) {
+        log.trace("Encoded to \(code), table: \(table) at code size \(table.meta.codeSize)")
         data.write(UInt(code), bitCount: UInt(table.meta.codeSize))
     }
 }

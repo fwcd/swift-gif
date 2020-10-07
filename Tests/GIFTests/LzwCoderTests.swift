@@ -20,9 +20,10 @@ final class LzwCoderTests: XCTestCase {
         2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
         2, 2, 2, 2, 2, 1, 1, 1, 1, 1
     ]
+    fileprivate let colorCount = 4
 
     func testLzwEncoder() throws {
-        var encoder = LzwEncoder(colorCount: 4)
+        var encoder = LzwEncoder(colorCount: colorCount)
         var encoded = BitData()
         var i = 0
 
@@ -74,7 +75,7 @@ final class LzwCoderTests: XCTestCase {
     }
 
     func testLzwDecoder() throws {
-        var encoder = LzwEncoder(colorCount: 4)
+        var encoder = LzwEncoder(colorCount: colorCount)
         var encoded = BitData()
 
         encoder.beginEncoding(into: &encoded)
@@ -85,7 +86,7 @@ final class LzwCoderTests: XCTestCase {
 
         encoded = encoded.atHead
 
-        var decoder = LzwDecoder(colorCount: 4)
+        var decoder = LzwDecoder(colorCount: colorCount)
         var decoded = [Int]()
 
         try decoder.beginDecoding(from: &encoded)

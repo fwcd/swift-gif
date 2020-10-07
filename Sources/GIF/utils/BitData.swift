@@ -1,4 +1,7 @@
 import Foundation
+import Logging
+
+fileprivate let log = Logger(label: "GIF.BitData")
 
 /// Enables reading and writing chunks of individual
 /// bits in a byte buffer. Note that bits are written
@@ -23,18 +26,17 @@ struct BitData {
 
     /// Writes the rightmost `bitCount` bits from the value.
     public mutating func write(_ value: UInt, bitCount: UInt) {
-        // Add necessary zeros first
-        let newZeroCount = (bitIndexFromRight + bitCount) / 8
-        for _ in 0..<newZeroCount {
-            bytes.append(0)
-        }
-
         // Write bits
         for i in 0..<bitCount {
             let bit = (value >> i) & 1
             bytes[byteIndex] |= UInt8(bit << bitIndexFromRight)
             bitIndexFromRight += 1
+
+            if bitIndexFromRight == 0 {
+                bytes.append(0)
+            }
         }
+        log.info("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
     }
 
     public mutating func read(bitCount: UInt) -> UInt {
@@ -46,6 +48,7 @@ struct BitData {
             result |= bit << i
             bitIndexFromRight += 1
         }
+        log.info("Read \(result) of width \(bitCount)")
         return result
     }
 }

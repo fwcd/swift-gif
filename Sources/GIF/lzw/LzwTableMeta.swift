@@ -28,10 +28,17 @@ struct LzwTableMeta {
     }
 
     mutating func incrementCount() {
-        if count == (1 << codeSize) {
+
+        count += 1
+    }
+
+    mutating func updateCodeSize(offset: Int) {
+        // TODO: Largest code size is 12 bits, see coding section
+        // in http://giflib.sourceforge.net/whatsinagif/lzw_image_data.html
+        // We should handle this case!
+        if count == ((1 << codeSize) + offset) {
             codeSize += 1
         }
-        count += 1
     }
 
     mutating func reset() {
