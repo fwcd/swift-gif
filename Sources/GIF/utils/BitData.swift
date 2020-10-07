@@ -9,7 +9,6 @@ struct BitData {
     private var bitIndexFromRight: UInt = 0 { // ...inside the current byte
         didSet {
             if bitIndexFromRight >= 8 {
-                bytes.append(0)
                 byteIndex += 1
                 bitIndexFromRight = 0
             }
@@ -23,50 +22,30 @@ struct BitData {
     }
 
     /// Writes the rightmost `bitCount` bits from the value.
-    public mutating func write(_ value: UInt, bitCount initialBitCount: UInt) {
-        var bitCount = initialBitCount
-        while bitCount > 0 {
-            let c = min(bitCount, remainingBitsInByte)
-            let i = initialBitCount - bitCount
-            writeIntoCurrentByte(value >> i, bitCount: c)
-            bitCount -= c
+    public mutating func write(_ value: UInt, bitCount: UInt) {
+        // Add necessary zeros first
+        let newZeroCount = (bitIndexFromRight + bitCount) / 8
+        for _ in 0..<newZeroCount {
+            bytes.append(0)
+        }
+
+        // Write bits
+        for i in 0..<bitCount {
+            let bit = (value >> i) & 1
+            bytes[byteIndex] |= UInt8(bit << bitIndexFromRight)
+            bitIndexFromRight += 1
         }
     }
 
-    public mutating func read(bitCount initialBitCount: UInt) -> UInt {
-        assert(Int(initialBitCount) <= UInt.bitWidth)
-        var bitCount: UInt = initialBitCount
-        var value: UInt = 0
-        while bitCount > 0 {
-            let c = min(bitCount, remainingBitsInByte)
-            let i = initialBitCount - bitCount
-            value |= readFromCurrentByte(bitCount: c) << i
-            bitCount -= c
+    public mutating func read(bitCount: UInt) -> UInt {
+        assert(bitCount <= UInt.bitWidth)
+        // Read bits
+        var result: UInt = 0
+        for i in 0..<bitCount {
+            let bit = (UInt(bytes[byteIndex]) >> bitIndexFromRight) & 1
+            result |= bit << i
+            bitIndexFromRight += 1
         }
-        return value
-    }
-
-    private mutating func writeIntoCurrentByte(_ value: UInt, bitCount: UInt) {
-        let oldByte = bytes[byteIndex]
-        let mask: UInt = maskOfOnes(bitCount: UInt(bitCount))
-        bytes[byteIndex] = oldByte | UInt8((value & mask) << bitIndexFromRight)
-        bitIndexFromRight += bitCount
-    }
-
-    private mutating func readFromCurrentByte(bitCount: UInt) -> UInt {
-        let byte = bytes[byteIndex]
-        let mask: UInt = maskOfOnes(bitCount: bitCount)
-        let value = UInt(byte >> bitIndexFromRight) & mask
-        bitIndexFromRight += bitCount
-        return value
-    }
-
-    private func maskOfOnes<U>(bitCount: U) -> U where U: FixedWidthInteger {
-        assert(bitCount <= U.bitWidth)
-        if bitCount == U.bitWidth {
-            return U.max
-        } else {
-            return (1 << bitCount) - 1
-        }
+        return result
     }
 }
