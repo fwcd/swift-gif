@@ -36,7 +36,7 @@ struct BitData {
                 bytes.append(0)
             }
         }
-        log.info("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
+        log.trace("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
     }
 
     public mutating func read(bitCount: UInt) -> UInt {
@@ -48,7 +48,7 @@ struct BitData {
             result |= bit << i
             bitIndexFromRight += 1
         }
-        log.info("Read \(result) of width \(bitCount)")
+        log.trace("Read \(result) of width \(bitCount)")
         return result
     }
 }
