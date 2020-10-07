@@ -28,7 +28,10 @@ struct LzwDecoder {
 
     private mutating func decodeAndAppend(code: Int, into decoded: inout [Int]) throws -> Bool {
         // The main LZW decoding algorithm
-        guard code != table.meta.endOfInfoCode else { return false }
+        guard code != table.meta.endOfInfoCode else {
+            log.trace("Reached end-of-info")
+            return false
+        }
         if code == table.meta.clearCode {
             table.reset()
             lastCode = nil

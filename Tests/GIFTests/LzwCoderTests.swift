@@ -90,9 +90,7 @@ final class LzwCoderTests: XCTestCase {
         var decoded = [Int]()
 
         try decoder.beginDecoding(from: &encoded)
-        for _ in 0..<indices.count {
-            try decoder.decodeAndAppend(from: &encoded, into: &decoded)
-        }
+        while try decoder.decodeAndAppend(from: &encoded, into: &decoded) {}
 
         XCTAssertEqual(decoded, indices)
     }
