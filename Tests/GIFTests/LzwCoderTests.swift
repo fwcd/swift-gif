@@ -26,6 +26,8 @@ final class LzwCoderTests: XCTestCase {
         var encoded = BitData()
         var i = 0
 
+        encoder.beginEncoding(into: &encoded)
+
         // Each code uses 3 bits in the output
         XCTAssertEqual(encoder.table.meta.codeSize, 3)
         XCTAssertEqual(encoder.table.meta.count, 6)
