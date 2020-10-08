@@ -7,7 +7,7 @@ A lightweight LZW encoder and decoder for animated GIFs written in pure Swift, t
 ## Example
 ```swift
 // Create a new GIF
-var gif = AnimatedGIF(width: 300, height: 300)
+var gif = GIF(width: 300, height: 300)
 
 // Add some frames for the animation
 for i in 0..<20 {

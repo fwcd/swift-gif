@@ -2,7 +2,7 @@ import Foundation
 import Graphics
 
 /// An in-memory, decoded GIF animation.
-public struct AnimatedGIF {
+public struct GIF {
     public let width: Int
     public let height: Int
     private let globalQuantization: ColorQuantization?
@@ -21,7 +21,7 @@ public struct AnimatedGIF {
     }
 
     public init(data: Data) throws {
-        var decoder = try AnimatedGIFDecoder(data: data)
+        var decoder = try GIFDecoder(data: data)
 
         width = Int(decoder.width)
         height = Int(decoder.height)
@@ -54,7 +54,7 @@ public struct AnimatedGIF {
     }
 
     public func encoded() throws -> Data {
-        var encoder = AnimatedGIFEncoder(width: UInt16(width), height: UInt16(height), globalQuantization: globalQuantization)
+        var encoder = GIFEncoder(width: UInt16(width), height: UInt16(height), globalQuantization: globalQuantization)
 
         for frame in frames {
             var localQuantization: ColorQuantization? = nil

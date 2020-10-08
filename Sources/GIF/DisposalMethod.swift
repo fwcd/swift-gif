@@ -1,4 +1,4 @@
-// Determines how an AnimatedGIF should
+// Determines how an GIF should
 // move on to the next frame
 public enum DisposalMethod: UInt8 {
     case keepCanvas = 1

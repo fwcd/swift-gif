@@ -2,10 +2,10 @@ import Foundation
 import Logging
 import Graphics
 
-fileprivate let log = Logger(label: "GIF.AnimatedGIFDecoder")
+fileprivate let log = Logger(label: "GIF.GIFDecoder")
 
 /// Decodes an animated from an in-memory byte buffer.
-struct AnimatedGIFDecoder {
+struct GIFDecoder {
     public private(set) var globalQuantization: ColorQuantization? = nil
     private var logicalScreenDescriptor: LogicalScreenDescriptor!
     private var data: Data
@@ -27,7 +27,7 @@ struct AnimatedGIFDecoder {
     }
 
     private mutating func readByte() throws -> UInt8 {
-        guard let byte = data.popFirst() else { throw AnimatedGIFDecodingError.noMoreBytes }
+        guard let byte = data.popFirst() else { throw GIFDecodingError.noMoreBytes }
         return byte
     }
 
@@ -46,12 +46,12 @@ struct AnimatedGIFDecoder {
         while let byte = try? readByte(), byte != 0 {
             bytes.append(byte)
         }
-        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw AnimatedGIFDecodingError.invalidStringEncoding }
+        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding }
         return s
     }
 
     private mutating func readHeader() throws {
-        guard try readString() == "GIF89a" else { throw AnimatedGIFDecodingError.invalidHeader }
+        guard try readString() == "GIF89a" else { throw GIFDecodingError.invalidHeader }
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
@@ -90,6 +90,6 @@ struct AnimatedGIFDecoder {
     }
 
     public mutating func readTrailer() throws {
-        guard try readByte() == 0x3B else { throw AnimatedGIFDecodingError.invalidTrailer }
+        guard try readByte() == 0x3B else { throw GIFDecodingError.invalidTrailer }
     }
 }

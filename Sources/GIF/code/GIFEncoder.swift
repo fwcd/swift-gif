@@ -3,20 +3,20 @@ import Logging
 import Graphics
 import Utils
 
-fileprivate let log = Logger(label: "GIF.AnimatedGIFEncoder")
+fileprivate let log = Logger(label: "GIF.GIFEncoder")
 
 fileprivate let colorChannels = 3
 fileprivate let transparentColorIndex: UInt8 = 0xFF
 fileprivate let colorResolution: UInt8 = 0b111 // Between 0 and 8 (exclusive) -> Will be interpreted as (bits per pixel - 1)
 
 /// Encodes an animated GIF to an in-memory byte buffer.
-struct AnimatedGIFEncoder {
+struct GIFEncoder {
     private let width: UInt16
     private let height: UInt16
     private let globalQuantization: ColorQuantization?
     public private(set) var data: Data
 
-    /// Creates a new AnimatedGIF with the specified
+    /// Creates a new GIF with the specified
     /// dimensions. A loop count of 0 means infinite
     /// loops.
     public init(width: UInt16, height: UInt16, loopCount: UInt16 = 0, globalQuantization: ColorQuantization? = nil) {
@@ -231,7 +231,7 @@ struct AnimatedGIFEncoder {
         assert(frameHeight == height)
 
         if frameWidth != width || frameHeight != height {
-            throw AnimatedGIFEncodingError.frameSizeMismatch(image.width, image.height, Int(width), Int(height))
+            throw GIFEncodingError.frameSizeMismatch(image.width, image.height, Int(width), Int(height))
         }
 
         appendGraphicsControlExtension(disposalMethod: disposalMethod, delayTime: delayTime)
