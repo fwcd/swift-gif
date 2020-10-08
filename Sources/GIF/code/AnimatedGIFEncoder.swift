@@ -5,8 +5,6 @@ import Utils
 
 fileprivate let log = Logger(label: "GIF.AnimatedGIFEncoder")
 
-public let gifColorCount = 256
-public let gifNonTransparentColorCount = gifColorCount - 1
 fileprivate let colorChannels = 3
 fileprivate let transparentColorIndex: UInt8 = 0xFF
 fileprivate let colorResolution: UInt8 = 0b111 // Between 0 and 8 (exclusive) -> Will be interpreted as (bits per pixel - 1)
@@ -39,40 +37,7 @@ struct AnimatedGIFEncoder {
     }
 
     public init(quantizingImage image: Image) {
-        self.init(width: UInt16(image.width), height: UInt16(image.height), globalQuantization: OctreeQuantization(fromImage: image, colorCount: gifNonTransparentColorCount))
-    }
-
-    // Determines how an AnimatedGIF should
-    // move on to the next frame
-    public enum DisposalMethod: UInt8 {
-        case keepCanvas = 1
-        case clearCanvas = 2
-        case restoreCanvas = 3
-    }
-
-    struct PackedFieldByte {
-        private(set) var rawValue: UInt8 = 0
-        private var bitIndex: Int = 0
-
-        private subscript(_ bitIndex: Int) -> UInt8 {
-            get { return (rawValue >> (7 - bitIndex)) }
-            set(newValue) { rawValue = rawValue | (newValue << (7 - bitIndex)) }
-        }
-
-        /// Appends a value to the bitfield
-        /// by converting it to little-endian
-        /// and masking it.
-        mutating func append(_ appended: UInt8, bits: Int) {
-            assert(bitIndex < 8)
-            let mask: UInt8 = (1 << UInt8(bits)) - 1
-            let masked = appended & mask
-            rawValue = rawValue | (masked << ((8 - bits) - bitIndex))
-            bitIndex += bits
-        }
-
-        mutating func append(_ flag: Bool) {
-            append(flag ? 1 : 0, bits: 1)
-        }
+        self.init(width: UInt16(image.width), height: UInt16(image.height), globalQuantization: OctreeQuantization(fromImage: image, colorCount: GIFConstants.nonTransparentColorCount))
     }
 
     private mutating func append(byte: UInt8) {
@@ -123,7 +88,7 @@ struct AnimatedGIFEncoder {
         append(byte: 0x00) // Block terminator
     }
 
-    private mutating func appendGraphicsControlExtension(disposalMethod: DisposalMethod, delayTime: UInt16) {
+    private mutating func appendGraphicsControlExtension(disposalMethod: UInt8, delayTime: UInt16) {
         append(byte: 0x21) // Extension introducer
         append(byte: 0xF9) // Graphics control label
         append(byte: 0x04) // Block size in bytes
@@ -166,7 +131,7 @@ struct AnimatedGIFEncoder {
 
     private mutating func append(colorTable: [Color]) {
         log.debug("Appending color table...")
-        let maxColorBytes = gifColorCount * colorChannels
+        let maxColorBytes = GIFConstants.colorCount * colorChannels
         var i = 0
 
         for color in colorTable {
@@ -193,7 +158,7 @@ struct AnimatedGIFEncoder {
     private mutating func appendImageDataAsLZW(frame: Image, quantization: ColorQuantization, width: Int, height: Int) {
         // Convert the ARGB-encoded image first to color
         // indices and then to LZW-compressed codes
-        var encoder = LzwEncoder(colorCount: gifColorCount)
+        var encoder = LzwEncoder(colorCount: GIFConstants.colorCount)
         var lzwEncoded = BitData()
 
         log.debug("LZW-encoding the frame...")
@@ -227,26 +192,35 @@ struct AnimatedGIFEncoder {
 
     /// Appends a frame with the specified delay time
     /// (in hundrets of a second).
-    public mutating func append(frame: Image, delayTime: UInt16, disposalMethod: DisposalMethod = .clearCanvas) throws {
+    public mutating func appendFrame(
+        image: Image,
+        delayTime: UInt16,
+        disposalMethod: UInt8
+    ) throws {
         var localQuantization: ColorQuantization? = nil
 
         if globalQuantization == nil {
-            localQuantization = OctreeQuantization(fromImage: frame, colorCount: gifColorCount)
+            localQuantization = OctreeQuantization(fromImage: image, colorCount: GIFConstants.colorCount)
         }
 
-        try append(frame: frame, localQuantization: localQuantization, delayTime: delayTime, disposalMethod: disposalMethod)
+        try appendFrame(image: image, delayTime: delayTime, localQuantization: localQuantization, disposalMethod: disposalMethod)
     }
 
     /// Appends a frame with the specified quantizer
     /// and delay time (in hundrets of a second).
-    public mutating func append(frame: Image, localQuantization: ColorQuantization? = nil, delayTime: UInt16, disposalMethod: DisposalMethod = .clearCanvas) throws {
-        let frameWidth = UInt16(frame.width)
-        let frameHeight = UInt16(frame.height)
+    public mutating func appendFrame(
+        image: Image,
+        delayTime: UInt16,
+        localQuantization: ColorQuantization? = nil,
+        disposalMethod: UInt8
+    ) throws {
+        let frameWidth = UInt16(image.width)
+        let frameHeight = UInt16(image.height)
         assert(frameWidth == width)
         assert(frameHeight == height)
 
         if frameWidth != width || frameHeight != height {
-            throw AnimatedGIFEncodingError.frameSizeMismatch(frame.width, frame.height, Int(width), Int(height))
+            throw AnimatedGIFEncodingError.frameSizeMismatch(image.width, image.height, Int(width), Int(height))
         }
 
         appendGraphicsControlExtension(disposalMethod: disposalMethod, delayTime: delayTime)
@@ -257,7 +231,7 @@ struct AnimatedGIFEncoder {
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
-        appendImageDataAsLZW(frame: frame, quantization: quantization, width: frame.width, height: frame.height)
+        appendImageDataAsLZW(frame: image, quantization: quantization, width: image.width, height: image.height)
     }
 
     public mutating func appendTrailer() {

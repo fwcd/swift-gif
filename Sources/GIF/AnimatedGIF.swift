@@ -1,6 +1,7 @@
 import Foundation
 import Graphics
 
+/// An in-memory, decoded GIF animation.
 public struct AnimatedGIF {
     public let width: Int
     public let height: Int
@@ -16,7 +17,7 @@ public struct AnimatedGIF {
     public init(quantizingImage image: Image) {
         width = image.width
         height = image.height
-        globalQuantization = OctreeQuantization(fromImage: image, colorCount: gifNonTransparentColorCount)
+        globalQuantization = OctreeQuantization(fromImage: image, colorCount: GIFConstants.nonTransparentColorCount)
     }
 
     public init(data: Data) throws {
@@ -37,10 +38,14 @@ public struct AnimatedGIF {
     public struct Frame {
         public let image: Image
         public let delayTime: Int
+        public let localQuantization: ColorQuantization?
+        public let disposalMethod: DisposalMethod
 
-        public init(image: Image, delayTime: Int) {
+        public init(image: Image, delayTime: Int, localQuantization: ColorQuantization? = nil, disposalMethod: DisposalMethod = .clearCanvas) {
             self.image = image
             self.delayTime = delayTime
+            self.localQuantization = localQuantization
+            self.disposalMethod = disposalMethod
         }
     }
 
@@ -50,9 +55,17 @@ public struct AnimatedGIF {
 
     public func encoded() throws -> Data {
         var encoder = AnimatedGIFEncoder(width: UInt16(width), height: UInt16(height), globalQuantization: globalQuantization)
+
         for frame in frames {
-            try encoder.append(frame: frame.image, delayTime: UInt16(frame.delayTime))
+            var localQuantization: ColorQuantization? = nil
+
+            if globalQuantization == nil {
+                localQuantization = OctreeQuantization(fromImage: frame.image, colorCount: GIFConstants.colorCount)
+            }
+
+            try encoder.appendFrame(image: frame.image, delayTime: UInt16(frame.delayTime), localQuantization: localQuantization, disposalMethod: frame.disposalMethod.rawValue)
         }
+
         encoder.appendTrailer()
         return encoder.data
     }
