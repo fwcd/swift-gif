@@ -4,7 +4,7 @@ public struct Frame {
     public let image: Image
     public let imageDescriptor: ImageDescriptor
     public let graphicsControlExtension: GraphicsControlExtension
-    public let localQuantization: ColorQuantization?
+    public internal(set) var localQuantization: ColorQuantization?
 
     public var delayTime: Int { Int(graphicsControlExtension.delayTime) }
     public var disposalMethod: DisposalMethod { graphicsControlExtension.disposalMethod }
@@ -34,7 +34,7 @@ public struct Frame {
                 userInputFlag: false,
                 transparentColorFlag: true,
                 delayTime: UInt16(delayTime),
-                backgroundColorIndex:
+                backgroundColorIndex: GIFConstants.backgroundColorIndex
             ),
             localQuantization: localQuantization
         )

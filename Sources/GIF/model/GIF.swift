@@ -9,7 +9,7 @@ public struct GIF {
     public var frames: [Frame] {
         didSet {
             for i in 0..<frames.count {
-                frames[i].colorTable = frames[i].colorTable ?? OctreeQuantization(fromImage: frames[i].image, colorCount: GIFConstants.colorCount)
+                frames[i].localQuantization = frames[i].localQuantization ?? OctreeQuantization(fromImage: frames[i].image, colorCount: GIFConstants.colorCount)
             }
         }
     }
@@ -19,15 +19,15 @@ public struct GIF {
 
     public var loopCount: Int? {
         get {
-            frames.compactMap {
-                guard let .looping(count) = $0 else { return nil }
+            applicationExtensions.compactMap {
+                guard case let .looping(count) = $0 else { return nil }
                 return Int(count)
             }.first
         }
         set {
-            frames = frames.map {
-                if .looping(_) = $0 {
-                    return .looping(UInt16(newValue))
+            applicationExtensions = applicationExtensions.compactMap {
+                if case .looping(_) = $0 {
+                    return newValue.map { .looping(loopCount: UInt16($0)) }
                 } else {
                     return $0
                 }
@@ -36,19 +36,22 @@ public struct GIF {
     }
 
     // High-level initializers
-    public init(width: Int, height: Int, globalQuantization: ColorQuantization? = nil) {
+    public init(width: Int, height: Int, loopCount: Int? = nil, globalQuantization: ColorQuantization? = nil) {
         self.init(
             logicalScreenDescriptor: LogicalScreenDescriptor(
-                width: width,
-                height: height,
+                width: UInt16(width),
+                height: UInt16(height),
                 useGlobalColorTable: globalQuantization != nil,
-                colorResolution: colorResolution,
+                colorResolution: GIFConstants.colorResolution,
                 sortFlag: false,
                 sizeOfGlobalColorTable: GIFConstants.colorResolution,
                 backgroundColorIndex: 0,
                 pixelAspectRatio: 0
             ),
-            globalQuantization: globalQuantization
+            globalQuantization: globalQuantization,
+            applicationExtensions: [
+                loopCount.map { .looping(loopCount: UInt16($0)) }
+            ].compactMap { $0 }
         )
     }
 
