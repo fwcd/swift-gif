@@ -6,31 +6,44 @@ fileprivate let log = Logger(label: "GIF.GIFDecoder")
 
 /// Decodes an animated from an in-memory byte buffer.
 struct GIFDecoder {
-    public private(set) var globalQuantization: ColorQuantization? = nil
-    private var logicalScreenDescriptor: LogicalScreenDescriptor!
     private var data: Data
-
-    public var width: UInt16 { logicalScreenDescriptor.width }
-    public var height: UInt16 { logicalScreenDescriptor.height }
 
     public init(data: Data) throws {
         self.data = data
+    }
 
+    public mutating func readGIF() throws -> GIF {
         try readHeader()
-        logicalScreenDescriptor = try readLogicalScreenDescriptor()
+
+        let logicalScreenDescriptor = try readLogicalScreenDescriptor()
+        var globalQuantization: ColorQuantization? = nil
 
         if logicalScreenDescriptor.useGlobalColorTable {
             globalQuantization = try readColorTable()
         }
 
-        // TODO: Read extensions, image data etc
+        var applicationExtensions = [ApplicationExtension]()
+        var frames = [Frame]()
+
+        while let frame = try readFrame() {
+            frames.append(frame)
+        }
+
+        while let applicationExtension = try readApplicationExtension() {
+            applicationExtensions.append(applicationExtension)
+        }
+
+        try readTrailer()
+
+        return GIF(
+            logicalScreenDescriptor: logicalScreenDescriptor,
+            globalQuantization: globalQuantization,
+            applicationExtensions: applicationExtensions,
+            frames: frames
+        )
     }
 
-    public mutating func readGIF() throws -> GIF {
-        // TODO
-        fatalError("TODO")
-    }
-
+    @discardableResult
     private mutating func readByte() throws -> UInt8 {
         guard let byte = data.popFirst() else { throw GIFDecodingError.noMoreBytes }
         return byte
@@ -40,6 +53,7 @@ struct GIFDecoder {
         try PackedFieldByte(rawValue: readByte())
     }
 
+    @discardableResult
     private mutating func readShort() throws -> UInt16 {
         let lower = try readByte()
         let higher = try readByte()
@@ -55,14 +69,16 @@ struct GIFDecoder {
         return s
     }
 
-    private mutating func expect(bytes: [UInt8], elseThrow error: @autoclosure () -> Error) throws {
-        for byte in bytes {
-            guard try readByte() == byte else { throw error() }
+    private mutating func readBytes(count: Int) throws -> [UInt8] {
+        var bytes = [UInt8]()
+        for _ in 0..<count {
+            try bytes.append(readByte())
         }
+        return bytes
     }
 
     private mutating func readHeader() throws {
-        guard try readString() == "GIF89a" else { throw GIFDecodingError.invalidHeader }
+        guard try readString() == GIFConstants.header else { throw GIFDecodingError.invalidHeader }
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
@@ -95,12 +111,27 @@ struct GIFDecoder {
         fatalError("TODO")
     }
 
-    public mutating func readFrame() throws -> (image: Image, delayTime: Int) {
+    private mutating func readFrame() throws -> Frame? {
         // TODO
         fatalError("TODO")
     }
 
-    public mutating func readTrailer() throws {
-        try expect(bytes: [0x3B], elseThrow: GIFDecodingError.invalidTrailer)
+    private mutating func readApplicationExtension() throws -> ApplicationExtension? {
+        guard try readShort() == 0x21FF else { return nil }
+        return try? readLoopingExtension()
+    }
+
+    private mutating func readLoopingExtension() throws -> ApplicationExtension {
+        try readByte() // Skip block size
+        guard try readString() == "NETSCAPE2.0" else { throw GIFDecodingError.invalidLoopingExtension }
+        try readByte() // Skip block size
+        guard try readByte() == 0x01 else { throw GIFDecodingError.invalidLoopingExtension }
+        let loopCount = try readShort()
+        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator }
+        return .looping(loopCount: loopCount)
+    }
+
+    private mutating func readTrailer() throws {
+        guard try readByte() == GIFConstants.trailer else { throw GIFDecodingError.invalidTrailer }
     }
 }

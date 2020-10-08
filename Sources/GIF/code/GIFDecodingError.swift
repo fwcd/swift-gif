@@ -3,4 +3,7 @@ public enum GIFDecodingError: Error {
     case invalidHeader
     case invalidTrailer
     case invalidStringEncoding
+    case invalidBlockSize
+    case invalidBlockTerminator
+    case invalidLoopingExtension
 }
