@@ -54,7 +54,7 @@ struct GIFEncoder {
     }
 
     private mutating func appendHeader() {
-        append(string: GIFConstants.header)
+        append(string: "GIF89a")
     }
 
     private mutating func append(logicalScreenDescriptor: LogicalScreenDescriptor) {

@@ -78,7 +78,7 @@ struct GIFDecoder {
     }
 
     private mutating func readHeader() throws {
-        guard try readString() == GIFConstants.header else { throw GIFDecodingError.invalidHeader }
+        guard try ["GIF89a", "GIF87a"].contains(readString()) else { throw GIFDecodingError.invalidHeader }
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
