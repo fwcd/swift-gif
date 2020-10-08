@@ -19,6 +19,21 @@ public struct AnimatedGIF {
         globalQuantization = OctreeQuantization(fromImage: image, colorCount: gifNonTransparentColorCount)
     }
 
+    public init(data: Data) throws {
+        var decoder = try AnimatedGIFDecoder(data: data)
+
+        width = decoder.width
+        height = decoder.height
+        globalQuantization = decoder.globalQuantization
+        frames = []
+
+        while let (image, delayTime) = try? decoder.readFrame() {
+            frames.append(Frame(image: image, delayTime: delayTime))
+        }
+
+        try decoder.readTrailer()
+    }
+
     public struct Frame {
         public let image: Image
         public let delayTime: Int

@@ -11,10 +11,8 @@ fileprivate let colorChannels = 3
 fileprivate let transparentColorIndex: UInt8 = 0xFF
 fileprivate let colorResolution: UInt8 = 0b111 // Between 0 and 8 (exclusive) -> Will be interpreted as (bits per pixel - 1)
 
-/// A GIF-encoder that supports
-/// (looping) animations written in
-/// pure Swift.
-public struct AnimatedGIFEncoder {
+/// Encodes an animated GIF to an in-memory byte buffer.
+struct AnimatedGIFEncoder {
     private let width: UInt16
     private let height: UInt16
     private let globalQuantization: ColorQuantization?
@@ -248,7 +246,7 @@ public struct AnimatedGIFEncoder {
         assert(frameHeight == height)
 
         if frameWidth != width || frameHeight != height {
-            throw AnimatedGIFError.frameSizeMismatch(frame.width, frame.height, Int(width), Int(height))
+            throw AnimatedGIFEncodingError.frameSizeMismatch(frame.width, frame.height, Int(width), Int(height))
         }
 
         appendGraphicsControlExtension(disposalMethod: disposalMethod, delayTime: delayTime)
