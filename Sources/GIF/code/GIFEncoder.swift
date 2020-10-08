@@ -177,7 +177,7 @@ struct GIFEncoder {
         // Iterate all pixels as ARGB values and encode them
         for y in 0..<height {
             for x in 0..<width {
-                encoder.encodeAndAppend(index: quantize(color: image[y, x], with: quantization), into: &lzwEncoded)
+                encoder.encodeAndAppend(index: quantize(color: image[y, x], with: quantization, backgroundColorIndex: backgroundColorIndex), into: &lzwEncoded)
             }
         }
 

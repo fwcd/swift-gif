@@ -12,7 +12,7 @@ var gif = GIF(width: 300, height: 300)
 // Add some frames for the animation
 for i in 0..<20 {
     let image = try Image(fromPngFile: "frame\(i).png")
-    gif.append(frame: .init(image: image, delayTime: 100))
+    gif.frames.append(.init(image: image, delayTime: 100))
 }
 
 // Encode the GIF to a byte buffer
