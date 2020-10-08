@@ -163,6 +163,22 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
+        initialize()
+    }
+
+    public init(fromColors colors: [Color]) {
+        colorTable = []
+        octree = OctreeNode(depth: 0)
+
+        log.debug("Inserting colors")
+        for color in colors {
+            octree.insert(color: color)
+        }
+
+        initialize()
+    }
+
+    private mutating func initialize() {
         var leafCount = 0
         var reduceQueues = [[QueuedReducibleNode]]()
 
