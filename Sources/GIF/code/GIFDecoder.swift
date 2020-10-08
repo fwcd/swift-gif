@@ -55,6 +55,12 @@ struct GIFDecoder {
         return s
     }
 
+    private mutating func expect(bytes: [UInt8], elseThrow error: @autoclosure () -> Error) throws {
+        for byte in bytes {
+            guard try readByte() == byte else { throw error() }
+        }
+    }
+
     private mutating func readHeader() throws {
         guard try readString() == "GIF89a" else { throw GIFDecodingError.invalidHeader }
     }
@@ -95,6 +101,6 @@ struct GIFDecoder {
     }
 
     public mutating func readTrailer() throws {
-        guard try readByte() == 0x3B else { throw GIFDecodingError.invalidTrailer }
+        try expect(bytes: [0x3B], elseThrow: GIFDecodingError.invalidTrailer)
     }
 }
