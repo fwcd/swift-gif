@@ -87,55 +87,50 @@ struct GIFEncoder {
         append(byte: logicalScreenDescriptor.pixelAspectRatio)
     }
 
-    private mutating func appendLoopingApplicationExtensionBlock(loopCount: UInt16) {
-        append(byte: 0x21) // Extension introducer
-        append(byte: 0xFF) // Application extension
-        append(byte: 0x0B) // Block size
-        append(string: "NETSCAPE2.0")
-        append(byte: 0x03) // Block size
-        append(byte: 0x01) // Loop indicator
-        append(short: loopCount)
-        append(byte: 0x00) // Block terminator
+    private mutating func append(applicationExtension: ApplicationExtension) {
+        switch applicationExtension {
+            case .looping(let count):
+                append(byte: 0x21) // Extension introducer
+                append(byte: 0xFF) // Application extension
+                append(byte: 0x0B) // Block size
+                append(string: "NETSCAPE2.0")
+                append(byte: 0x03) // Block size
+                append(byte: 0x01) // Loop indicator
+                append(short: loopCount)
+                append(byte: 0x00) // Block terminator
+        }
     }
 
-    private mutating func appendGraphicsControlExtension(disposalMethod: UInt8, delayTime: UInt16) {
+    private mutating func append(graphicsControlExtension: GraphicsControlExtension) {
         append(byte: 0x21) // Extension introducer
         append(byte: 0xF9) // Graphics control label
         append(byte: 0x04) // Block size in bytes
 
-        let disposalMethod = DisposalMethod.clearCanvas.rawValue
-        let userInputFlag = false
-        let transparentColorFlag = true
-
         var packedField = PackedFieldByte()
         packedField.append(0, bits: 3)
-        packedField.append(disposalMethod, bits: 3)
-        packedField.append(userInputFlag)
-        packedField.append(transparentColorFlag)
+        packedField.append(graphicsControlExtension.disposalMethod, bits: 3)
+        packedField.append(graphicsControlExtension.userInputFlag)
+        packedField.append(graphicsControlExtension.transparentColorFlag)
         append(packedField: packedField)
 
-        append(short: delayTime)
-        append(byte: backgroundColorIndex) // Transparent color index
+        append(short: graphicsControlExtension.delayTime)
+        append(byte: graphicsControlExtension.backgroundColorIndex) // Transparent color index
         append(byte: 0x00) // Block terminator
     }
 
-    private mutating func appendImageDescriptor(useLocalColorTable: Bool = false) {
+    private mutating func append(imageDescriptor: ImageDescriptor) {
         append(byte: 0x2C) // Image separator
-        append(short: 0) // Left position
-        append(short: 0) // Top position
-        append(short: width)
-        append(short: height)
-
-        let interlaceFlag = false
-        let sortFlag = false
-        let sizeOfLocalColorTable: UInt8 = colorResolution
+        append(short: imageDescriptor.imageLeft)
+        append(short: imageDescriptor.imageTop)
+        append(short: imageDescriptor.imageWidth)
+        append(short: imageDescriptor.imageHeight)
 
         var packedField = PackedFieldByte()
-        packedField.append(useLocalColorTable)
-        packedField.append(interlaceFlag)
-        packedField.append(sortFlag)
+        packedField.append(imageDescriptor.useLocalColorTable)
+        packedField.append(imageDescriptor.interlaceFlag)
+        packedField.append(imageDescriptor.sortFlag)
         packedField.append(0, bits: 2)
-        packedField.append(sizeOfLocalColorTable, bits: 3)
+        packedField.append(imageDescriptor.sizeOfLocalColorTable, bits: 3)
         append(packedField: packedField)
     }
 
