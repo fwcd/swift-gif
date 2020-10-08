@@ -152,6 +152,8 @@ public struct OctreeQuantization: ColorQuantization {
     private var octree: OctreeNode
     public private(set) var colorTable: [Color]
 
+    /// Creates an octree, inserts the image's colors and reduces
+    /// the tree until only `colorCount` colors are left.
     public init(fromImage image: Image, colorCount: Int) {
         colorTable = []
         octree = OctreeNode(depth: 0)
@@ -163,22 +165,6 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        initialize(colorCount: colorCount)
-    }
-
-    public init(fromColors colors: [Color]) {
-        colorTable = []
-        octree = OctreeNode(depth: 0)
-
-        log.debug("Inserting colors")
-        for color in colors {
-            octree.insert(color: color)
-        }
-
-        initialize(colorCount: colors.count)
-    }
-
-    private mutating func initialize(colorCount: Int) {
         var leafCount = 0
         var reduceQueues = [[QueuedReducibleNode]]()
 
@@ -224,6 +210,18 @@ public struct OctreeQuantization: ColorQuantization {
 
         log.debug("Filling color table")
         octree.fill(colorTable: &colorTable)
+    }
+
+    /// Creates an octree without performing any reductions from the
+    /// given color table.
+    public init(fromColors colorTable: [Color]) {
+        self.colorTable = colorTable
+        octree = OctreeNode(depth: 0)
+
+        log.debug("Inserting colors")
+        for color in colorTable {
+            octree.insert(color: color)
+        }
     }
 
     public func quantize(color: Color) -> Int {

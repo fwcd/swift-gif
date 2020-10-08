@@ -19,7 +19,7 @@ struct GIFDecoder {
         var globalQuantization: ColorQuantization? = nil
 
         if logicalScreenDescriptor.useGlobalColorTable {
-            globalQuantization = try readColorTable()
+            globalQuantization = try readColorTable(colorResolution: logicalScreenDescriptor.colorResolution)
         }
 
         var applicationExtensions = [ApplicationExtension]()
@@ -58,6 +58,13 @@ struct GIFDecoder {
         let lower = try readByte()
         let higher = try readByte()
         return (UInt16(higher) << 8) | UInt16(lower)
+    }
+
+    private mutating func readColor() throws -> Color {
+        let red = try readByte()
+        let green = try readByte()
+        let blue = try readByte()
+        return Color(red: red, green: green, blue: blue)
     }
 
     private mutating func readString() throws -> String {
@@ -106,9 +113,15 @@ struct GIFDecoder {
         )
     }
 
-    private mutating func readColorTable() throws -> ColorQuantization {
-        // TODO
-        fatalError("TODO")
+    private mutating func readColorTable(colorResolution: UInt8) throws -> ColorQuantization {
+        let colorCount = 1 << (UInt(colorResolution) + 1) // = 2 ^ (N + 1), see http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html#graphics_control_extension_block
+        var colorTable = [Color]()
+
+        for _ in 0..<colorCount {
+            try colorTable.append(readColor())
+        }
+
+        return OctreeQuantization(fromColors: colorTable)
     }
 
     private mutating func readFrame() throws -> Frame? {

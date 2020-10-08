@@ -53,6 +53,12 @@ struct GIFEncoder {
         data.append(string.data(using: .utf8)!)
     }
 
+    private mutating func append(color: Color) {
+        append(byte: color.red)
+        append(byte: color.green)
+        append(byte: color.blue)
+    }
+
     private mutating func appendHeader() {
         append(string: "GIF89a")
     }
@@ -125,9 +131,7 @@ struct GIFEncoder {
         var i = 0
 
         for color in colorTable {
-            append(byte: color.red)
-            append(byte: color.green)
-            append(byte: color.blue)
+            append(color: color)
             i += GIFConstants.colorChannels
         }
 
