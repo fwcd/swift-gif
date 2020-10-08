@@ -26,6 +26,11 @@ struct GIFDecoder {
         // TODO: Read extensions, image data etc
     }
 
+    public mutating func readGIF() throws -> GIF {
+        // TODO
+        fatalError("TODO")
+    }
+
     private mutating func readByte() throws -> UInt8 {
         guard let byte = data.popFirst() else { throw GIFDecodingError.noMoreBytes }
         return byte

@@ -5,10 +5,6 @@ import Utils
 
 fileprivate let log = Logger(label: "GIF.GIFEncoder")
 
-fileprivate let colorChannels = 3
-fileprivate let transparentColorIndex: UInt8 = 0xFF
-fileprivate let colorResolution: UInt8 = 0b111 // Between 0 and 8 (exclusive) -> Will be interpreted as (bits per pixel - 1)
-
 /// Encodes an animated GIF to an in-memory byte buffer.
 struct GIFEncoder {
     private let width: UInt16
@@ -31,9 +27,9 @@ struct GIFEncoder {
             width: width,
             height: height,
             useGlobalColorTable: globalQuantization != nil,
-            colorResolution: colorResolution,
+            colorResolution: GIFConstants.colorResolution,
             sortFlag: false,
-            sizeOfGlobalColorTable: colorResolution,
+            sizeOfGlobalColorTable: GIFConstants.colorResolution,
             backgroundColorIndex: 0,
             pixelAspectRatio: 0
         ))
@@ -47,6 +43,12 @@ struct GIFEncoder {
 
     public init(quantizingImage image: Image) {
         self.init(width: UInt16(image.width), height: UInt16(image.height), globalQuantization: OctreeQuantization(fromImage: image, colorCount: GIFConstants.nonTransparentColorCount))
+    }
+
+    public mutating func append(gif: GIF) {
+        // TODO
+        fatalError("TODO")
+        appendTrailer()
     }
 
     private mutating func append(byte: UInt8) {
@@ -73,9 +75,6 @@ struct GIFEncoder {
     private mutating func append(logicalScreenDescriptor: LogicalScreenDescriptor) {
         append(short: logicalScreenDescriptor.width)
         append(short: logicalScreenDescriptor.height)
-
-        let sortFlag = false
-        let sizeOfGlobalColorTable: UInt8 = colorResolution
 
         var packedField = PackedFieldByte()
         packedField.append(logicalScreenDescriptor.useGlobalColorTable)
@@ -116,7 +115,7 @@ struct GIFEncoder {
         append(packedField: packedField)
 
         append(short: delayTime)
-        append(byte: transparentColorIndex) // Transparent color index
+        append(byte: backgroundColorIndex) // Transparent color index
         append(byte: 0x00) // Block terminator
     }
 
@@ -142,14 +141,14 @@ struct GIFEncoder {
 
     private mutating func append(colorTable: [Color]) {
         log.debug("Appending color table...")
-        let maxColorBytes = GIFConstants.colorCount * colorChannels
+        let maxColorBytes = GIFConstants.colorCount * GIFConstants.colorChannels
         var i = 0
 
         for color in colorTable {
             append(byte: color.red)
             append(byte: color.green)
             append(byte: color.blue)
-            i += colorChannels
+            i += GIFConstants.colorChannels
         }
 
         while i < maxColorBytes {
@@ -158,9 +157,9 @@ struct GIFEncoder {
         }
     }
 
-    private func quantize(color: Color, with quantization: ColorQuantization) -> Int {
+    private func quantize(color: Color, with quantization: ColorQuantization, backgroundColorIndex: Int) -> Int {
         if color.alpha < 128 {
-            return Int(transparentColorIndex)
+            return backgroundColorIndex // Use transparent color
         } else {
             return quantization.quantize(color: color)
         }

@@ -163,7 +163,7 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        initialize()
+        initialize(colorCount: colorCount)
     }
 
     public init(fromColors colors: [Color]) {
@@ -175,10 +175,10 @@ public struct OctreeQuantization: ColorQuantization {
             octree.insert(color: color)
         }
 
-        initialize()
+        initialize(colorCount: colors.count)
     }
 
-    private mutating func initialize() {
+    private mutating func initialize(colorCount: Int) {
         var leafCount = 0
         var reduceQueues = [[QueuedReducibleNode]]()
 
