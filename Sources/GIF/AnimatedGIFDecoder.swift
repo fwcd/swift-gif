@@ -44,6 +44,10 @@ struct AnimatedGIFDecoder {
         guard try readString() == "GIF89a" else { throw AnimatedGIFDecodingError.invalidHeader }
     }
 
+    private mutating func readLogicalScreenDescriptor() throws {
+        // TODO
+    }
+
     public mutating func readFrame() throws -> (image: Image, delayTime: Int) {
         // TODO
         fatalError("TODO")
