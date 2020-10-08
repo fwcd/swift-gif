@@ -6,23 +6,33 @@ fileprivate let log = Logger(label: "GIF.AnimatedGIFDecoder")
 
 /// Decodes an animated from an in-memory byte buffer.
 struct AnimatedGIFDecoder {
-    public let width: Int!
-    public let height: Int!
-    public let globalQuantization: ColorQuantization?
+    public private(set) var globalQuantization: ColorQuantization? = nil
+    private var logicalScreenDescriptor: LogicalScreenDescriptor!
     private var data: Data
+
+    public var width: UInt16 { logicalScreenDescriptor.width }
+    public var height: UInt16 { logicalScreenDescriptor.height }
 
     public init(data: Data) throws {
         self.data = data
 
-        // TODO
-        width = -1
-        height = -1
-        globalQuantization = nil
+        try readHeader()
+        logicalScreenDescriptor = try readLogicalScreenDescriptor()
+
+        if logicalScreenDescriptor.useGlobalColorTable {
+            globalQuantization = try readColorTable()
+        }
+
+        // TODO: Read extensions, image data etc
     }
 
     private mutating func readByte() throws -> UInt8 {
         guard let byte = data.popFirst() else { throw AnimatedGIFDecodingError.noMoreBytes }
         return byte
+    }
+
+    private mutating func readPackedField() throws -> PackedFieldByte {
+        try PackedFieldByte(rawValue: readByte())
     }
 
     private mutating func readShort() throws -> UInt16 {
@@ -44,8 +54,34 @@ struct AnimatedGIFDecoder {
         guard try readString() == "GIF89a" else { throw AnimatedGIFDecodingError.invalidHeader }
     }
 
-    private mutating func readLogicalScreenDescriptor() throws {
+    private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
+        let width = try readShort()
+        let height = try readShort()
+
+        var packedField = try readPackedField()
+        let useGlobalColorTable = packedField.read()
+        let colorResolution = packedField.read(bits: 3)
+        let sortFlag = packedField.read()
+        let sizeOfGlobalColorTable = packedField.read(bits: 3)
+
+        let backgroundColorIndex = try readByte()
+        let pixelAspectRatio = try readByte()
+
+        return LogicalScreenDescriptor(
+            width: width,
+            height: height,
+            useGlobalColorTable: useGlobalColorTable,
+            colorResolution: colorResolution,
+            sortFlag: sortFlag,
+            sizeOfGlobalColorTable: sizeOfGlobalColorTable,
+            backgroundColorIndex: backgroundColorIndex,
+            pixelAspectRatio: pixelAspectRatio
+        )
+    }
+
+    private mutating func readColorTable() throws -> ColorQuantization {
         // TODO
+        fatalError("TODO")
     }
 
     public mutating func readFrame() throws -> (image: Image, delayTime: Int) {

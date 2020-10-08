@@ -23,8 +23,8 @@ public struct AnimatedGIF {
     public init(data: Data) throws {
         var decoder = try AnimatedGIFDecoder(data: data)
 
-        width = decoder.width
-        height = decoder.height
+        width = Int(decoder.width)
+        height = Int(decoder.height)
         globalQuantization = decoder.globalQuantization
         frames = []
 

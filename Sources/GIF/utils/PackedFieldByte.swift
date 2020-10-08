@@ -6,11 +6,6 @@ struct PackedFieldByte {
         self.rawValue = rawValue
     }
 
-    private subscript(_ bitIndex: Int) -> UInt8 {
-        get { return (rawValue >> (7 - bitIndex)) }
-        set(newValue) { rawValue = rawValue | (newValue << (7 - bitIndex)) }
-    }
-
     /// Appends a value to the bitfield
     /// by converting it to little-endian
     /// and masking it.
@@ -24,5 +19,25 @@ struct PackedFieldByte {
 
     mutating func append(_ flag: Bool) {
         append(flag ? 1 : 0, bits: 1)
+    }
+
+    mutating func read(bits: Int) -> UInt8 {
+        assert(bitIndex < 8)
+        let mask: UInt8 = (1 << UInt8(bits)) - 1
+        let value = (rawValue >> ((8 - bits) - bitIndex)) & mask
+        bitIndex += bits
+        return value
+    }
+
+    mutating func read() -> Bool {
+        read(bits: 1) != 0
+    }
+
+    mutating func skip(bits: Int) {
+        bitIndex += bits
+    }
+
+    mutating func skip() {
+        skip(bits: 1)
     }
 }

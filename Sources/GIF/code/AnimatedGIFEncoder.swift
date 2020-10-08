@@ -27,7 +27,16 @@ struct AnimatedGIFEncoder {
 
         // See http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html for a detailed explanation of the format
         appendHeader()
-        appendLogicalScreenDescriptor(useGlobalColorTable: globalQuantization != nil)
+        append(logicalScreenDescriptor: LogicalScreenDescriptor(
+            width: width,
+            height: height,
+            useGlobalColorTable: globalQuantization != nil,
+            colorResolution: colorResolution,
+            sortFlag: false,
+            sizeOfGlobalColorTable: colorResolution,
+            backgroundColorIndex: 0,
+            pixelAspectRatio: 0
+        ))
 
         if let quantization = globalQuantization {
             append(colorTable: quantization.colorTable)
@@ -44,6 +53,10 @@ struct AnimatedGIFEncoder {
         data.append(byte)
     }
 
+    private mutating func append(packedField: PackedFieldByte) {
+        append(byte: packedField.rawValue)
+    }
+
     private mutating func append(short: UInt16) {
         data.append(UInt8(short & 0xFF))
         data.append(UInt8((short >> 8) & 0xFF))
@@ -57,24 +70,22 @@ struct AnimatedGIFEncoder {
         append(string: "GIF89a")
     }
 
-    private mutating func appendLogicalScreenDescriptor(useGlobalColorTable: Bool = false) {
-        append(short: width)
-        append(short: height)
+    private mutating func append(logicalScreenDescriptor: LogicalScreenDescriptor) {
+        append(short: logicalScreenDescriptor.width)
+        append(short: logicalScreenDescriptor.height)
 
         let sortFlag = false
         let sizeOfGlobalColorTable: UInt8 = colorResolution
 
         var packedField = PackedFieldByte()
-        packedField.append(useGlobalColorTable)
-        packedField.append(colorResolution, bits: 3)
-        packedField.append(sortFlag)
-        packedField.append(sizeOfGlobalColorTable, bits: 3)
-        append(byte: packedField.rawValue)
+        packedField.append(logicalScreenDescriptor.useGlobalColorTable)
+        packedField.append(logicalScreenDescriptor.colorResolution, bits: 3)
+        packedField.append(logicalScreenDescriptor.sortFlag)
+        packedField.append(logicalScreenDescriptor.sizeOfGlobalColorTable, bits: 3)
+        append(packedField: packedField)
 
-        let backgroundColorIndex: UInt8 = 0
-        let pixelAspectRatio: UInt8 = 0
-        append(byte: backgroundColorIndex)
-        append(byte: pixelAspectRatio)
+        append(byte: logicalScreenDescriptor.backgroundColorIndex)
+        append(byte: logicalScreenDescriptor.pixelAspectRatio)
     }
 
     private mutating func appendLoopingApplicationExtensionBlock(loopCount: UInt16) {
@@ -102,7 +113,7 @@ struct AnimatedGIFEncoder {
         packedField.append(disposalMethod, bits: 3)
         packedField.append(userInputFlag)
         packedField.append(transparentColorFlag)
-        append(byte: packedField.rawValue)
+        append(packedField: packedField)
 
         append(short: delayTime)
         append(byte: transparentColorIndex) // Transparent color index
@@ -126,7 +137,7 @@ struct AnimatedGIFEncoder {
         packedField.append(sortFlag)
         packedField.append(0, bits: 2)
         packedField.append(sizeOfLocalColorTable, bits: 3)
-        append(byte: packedField.rawValue)
+        append(packedField: packedField)
     }
 
     private mutating func append(colorTable: [Color]) {
