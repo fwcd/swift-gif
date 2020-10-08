@@ -6,4 +6,5 @@ public enum GIFDecodingError: Error {
     case invalidBlockSize
     case invalidBlockTerminator
     case invalidLoopingExtension
+    case noQuantizationForDecodingImage
 }

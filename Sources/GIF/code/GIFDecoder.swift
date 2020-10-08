@@ -25,7 +25,7 @@ struct GIFDecoder {
         var applicationExtensions = [ApplicationExtension]()
         var frames = [Frame]()
 
-        while let frame = try readFrame() {
+        while let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
             frames.append(frame)
         }
 
@@ -124,9 +124,39 @@ struct GIFDecoder {
         return OctreeQuantization(fromColors: colorTable)
     }
 
-    private mutating func readFrame() throws -> Frame? {
+    private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension {
         // TODO
         fatalError("TODO")
+    }
+
+    private mutating func readImageDescriptor() throws -> ImageDescriptor {
+        // TODO
+        fatalError("TODO")
+    }
+
+    private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int) throws -> Image {
+        // TODO
+        fatalError("TODO")
+    }
+
+    private mutating func readFrame(colorResolution: UInt8, globalQuantization: ColorQuantization?) throws -> Frame? {
+        let graphicsControlExtension = try? readGraphicsControlExtension()
+        let imageDescriptor = try readImageDescriptor()
+        var localQuantization: ColorQuantization?
+
+        if imageDescriptor.useLocalColorTable {
+            localQuantization = try readColorTable(colorResolution: colorResolution)
+        }
+
+        guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
+        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight))
+
+        return Frame(
+            image: image,
+            imageDescriptor: imageDescriptor,
+            graphicsControlExtension: graphicsControlExtension,
+            localQuantization: localQuantization
+        )
     }
 
     private mutating func readApplicationExtension() throws -> ApplicationExtension? {

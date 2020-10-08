@@ -189,7 +189,10 @@ struct GIFEncoder {
     private mutating func append(frame: Frame, globalQuantization: ColorQuantization? = nil) {
         let image = frame.image
 
-        append(graphicsControlExtension: frame.graphicsControlExtension)
+        if let graphicsControlExtension = frame.graphicsControlExtension {
+            append(graphicsControlExtension: graphicsControlExtension)
+        }
+
         append(imageDescriptor: frame.imageDescriptor)
 
         if let quantization = frame.localQuantization {

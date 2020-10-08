@@ -3,17 +3,17 @@ import Graphics
 public struct Frame {
     public let image: Image
     public let imageDescriptor: ImageDescriptor
-    public let graphicsControlExtension: GraphicsControlExtension
+    public let graphicsControlExtension: GraphicsControlExtension?
     public internal(set) var localQuantization: ColorQuantization?
 
-    public var delayTime: Int { Int(graphicsControlExtension.delayTime) }
-    public var disposalMethod: DisposalMethod { graphicsControlExtension.disposalMethod }
+    public var delayTime: Int? { graphicsControlExtension.map { Int($0.delayTime) } }
+    public var disposalMethod: DisposalMethod? { graphicsControlExtension?.disposalMethod }
 
     /// High-level initializer
     public init(
         image: Image,
         imageDescriptor: ImageDescriptor? = nil,
-        delayTime: Int,
+        delayTime: Int = 0,
         localQuantization: ColorQuantization? = nil,
         disposalMethod: DisposalMethod = .clearCanvas
     ) {
@@ -44,7 +44,7 @@ public struct Frame {
     init(
         image: Image,
         imageDescriptor: ImageDescriptor,
-        graphicsControlExtension: GraphicsControlExtension,
+        graphicsControlExtension: GraphicsControlExtension?,
         localQuantization: ColorQuantization?
     ) {
         self.image = image
