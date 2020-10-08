@@ -5,6 +5,7 @@ import Graphics
 public struct GIF {
     public var logicalScreenDescriptor: LogicalScreenDescriptor
     public var globalQuantization: ColorQuantization?
+    public var applicationExtensions: [ApplicationExtension]
     public var frames: [Frame] {
         didSet {
             for i in 0..<frames.count {
@@ -15,6 +16,24 @@ public struct GIF {
 
     public var width: Int { Int(logicalScreenDescriptor.width) }
     public var height: Int { Int(logicalScreenDescriptor.height) }
+
+    public var loopCount: Int? {
+        get {
+            frames.compactMap {
+                guard let .looping(count) = $0 else { return nil }
+                return Int(count)
+            }.first
+        }
+        set {
+            frames = frames.map {
+                if .looping(_) = $0 {
+                    return .looping(UInt16(newValue))
+                } else {
+                    return $0
+                }
+            }
+        }
+    }
 
     // High-level initializers
     public init(width: Int, height: Int, globalQuantization: ColorQuantization? = nil) {
@@ -42,9 +61,15 @@ public struct GIF {
     }
 
     // Low-level initializer
-    init(logicalScreenDescriptor: LogicalScreenDescriptor, globalQuantization: ColorQuantization? = nil, frames: [Frame] = []) {
+    init(
+        logicalScreenDescriptor: LogicalScreenDescriptor,
+        globalQuantization: ColorQuantization? = nil,
+        applicationExtensions: [ApplicationExtension] = [],
+        frames: [Frame] = []
+    ) {
         self.logicalScreenDescriptor = logicalScreenDescriptor
         self.globalQuantization = globalQuantization
+        self.applicationExtensions = applicationExtensions
         self.frames = frames
     }
 }
