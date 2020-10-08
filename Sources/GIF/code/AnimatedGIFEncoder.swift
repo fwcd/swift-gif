@@ -155,7 +155,7 @@ struct AnimatedGIFEncoder {
         }
     }
 
-    private mutating func appendImageDataAsLZW(frame: Image, quantization: ColorQuantization, width: Int, height: Int) {
+    private mutating func appendImageDataAsLZW(image: Image, quantization: ColorQuantization, width: Int, height: Int) {
         // Convert the ARGB-encoded image first to color
         // indices and then to LZW-compressed codes
         var encoder = LzwEncoder(colorCount: GIFConstants.colorCount)
@@ -167,7 +167,7 @@ struct AnimatedGIFEncoder {
         // Iterate all pixels as ARGB values and encode them
         for y in 0..<height {
             for x in 0..<width {
-                encoder.encodeAndAppend(index: quantize(color: frame[y, x], with: quantization), into: &lzwEncoded)
+                encoder.encodeAndAppend(index: quantize(color: image[y, x], with: quantization), into: &lzwEncoded)
             }
         }
 
@@ -231,7 +231,7 @@ struct AnimatedGIFEncoder {
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
-        appendImageDataAsLZW(frame: image, quantization: quantization, width: image.width, height: image.height)
+        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height)
     }
 
     public mutating func appendTrailer() {
