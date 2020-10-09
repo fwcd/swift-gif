@@ -25,12 +25,20 @@ struct GIFDecoder {
         var applicationExtensions = [ApplicationExtension]()
         var frames = [Frame]()
 
-        while let applicationExtension = try readApplicationExtension() {
-            applicationExtensions.append(applicationExtension)
-        }
+        while true {
+            var foundSomething = false
 
-        while let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
-            frames.append(frame)
+            if let applicationExtension = try readApplicationExtension() {
+                applicationExtensions.append(applicationExtension)
+                foundSomething = true
+            }
+
+            if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
+                frames.append(frame)
+                foundSomething = true
+            }
+
+            guard foundSomething else { break }
         }
 
         try readTrailer()
@@ -156,7 +164,8 @@ struct GIFDecoder {
     }
 
     private mutating func readImageDescriptor() throws -> ImageDescriptor {
-        guard try readByte() == 0x2C else { throw GIFDecodingError.invalidImageSeparator("at the beginning of an image descriptor") }
+        let imageSeparator = try readByte()
+        guard imageSeparator == 0x2C else { throw GIFDecodingError.invalidImageSeparator("at the beginning of an image descriptor, got 0x\(String(imageSeparator, radix: 16))") }
 
         let imageLeft = try readShort()
         let imageTop = try readShort()
