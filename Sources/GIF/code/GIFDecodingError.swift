@@ -7,7 +7,7 @@ public enum GIFDecodingError: Error {
     case invalidBlockTerminator(String)
     case invalidDisposalMethod(UInt8)
     case invalidImageSeparator(String)
-    case invalidLoopingExtension
+    case invalidLoopingExtension(String)
     case invalidGraphicsControlExtension
     case missingImageDescriptor
     case noQuantizationForDecodingImage

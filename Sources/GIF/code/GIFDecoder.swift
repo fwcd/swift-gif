@@ -52,7 +52,6 @@ struct GIFDecoder {
         )
     }
 
-    @discardableResult
     private mutating func readByte() throws -> UInt8 {
         guard let byte = data.popFirst() else { throw GIFDecodingError.noMoreBytes }
         return byte
@@ -67,7 +66,6 @@ struct GIFDecoder {
         try PackedFieldByte(rawValue: readByte())
     }
 
-    @discardableResult
     private mutating func readShort() throws -> UInt16 {
         let lower = try readByte()
         let higher = try readByte()
@@ -97,6 +95,20 @@ struct GIFDecoder {
         }
         guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Not a UTF-8 string: \(bytes.hexString)") }
         return s
+    }
+
+    private func skipByte() throws {
+        guard !data.isEmpty else { throw GIFDecodingError.noMoreBytes }
+    }
+
+    private mutating func skipBytes(count: Int) throws {
+        guard data.count >= count else { throw GIFDecodingError.noMoreBytes }
+        data.removeFirst(count)
+    }
+
+    private func peekBytes(count: Int) throws -> [UInt8] {
+        guard data.count >= count else { throw GIFDecodingError.noMoreBytes }
+        return [UInt8](data.prefix(count))
     }
 
     private mutating func readBytes(count: Int) throws -> [UInt8] {
@@ -163,8 +175,8 @@ struct GIFDecoder {
     }
 
     private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension? {
-        guard try peekShort() == 0x21F9 else { return nil }
-        try readShort()
+        guard try peekBytes(count: 2) == [0x21, 0xF9] else { return nil }
+        try skipBytes(count: 2)
         guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
 
         var packedField = try readPackedField()
@@ -189,7 +201,7 @@ struct GIFDecoder {
 
     private mutating func readImageDescriptor() throws -> ImageDescriptor? {
         guard try peekByte() == 0x2C else { return nil }
-        try readByte()
+        try skipByte()
 
         let imageLeft = try readShort()
         let imageTop = try readShort()
@@ -270,25 +282,25 @@ struct GIFDecoder {
     }
 
     private mutating func readApplicationExtension() throws -> ApplicationExtension? {
-        guard try peekShort() == 0x21FF else { return nil }
-        try readShort()
+        guard try peekBytes(count: 2) == [0x21, 0xFF] else { return nil }
+        try skipBytes(count: 2)
         return try readLoopingExtension()
     }
 
     private mutating func readLoopingExtension() throws -> ApplicationExtension {
-        let netscape = "NETSCAPE2.0"
-        try readByte() // Skip block size
-        guard try readString(maxLength: netscape.count) == netscape else { throw GIFDecodingError.invalidLoopingExtension }
-        try readByte() // Skip block size
-        guard try readByte() == 0x01 else { throw GIFDecodingError.invalidLoopingExtension }
+        let blockSize = try readByte() // Block size
+        let s = try readString(maxLength: Int(blockSize))
+        guard s == "NETSCAPE2.0" else { throw GIFDecodingError.invalidLoopingExtension(s) }
+        guard try readByte() == 0x03 else { throw GIFDecodingError.invalidBlockSize("too much data in looping extension") }
+        guard try readByte() == 0x01 else { throw GIFDecodingError.invalidBlockSize("looping extension should only contain 1 data sub-block") }
         let loopCount = try readShort()
         guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in looping extension") }
         return .looping(loopCount: loopCount)
     }
 
     private mutating func readCommentExtension() throws -> String? {
-        guard try peekShort() == 0x21FE else { return nil }
-        try readShort()
+        guard try peekBytes(count: 2) == [0x21, 0xFE] else { return nil }
+        try skipBytes(count: 2)
         guard let s = try String(data: readSubBlocks(), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Could not decode comment") }
         return s
     }
@@ -296,6 +308,6 @@ struct GIFDecoder {
     private mutating func readTrailer() throws {
         let trailer = try peekByte()
         guard trailer == GIFConstants.trailer else { throw GIFDecodingError.invalidTrailer("Remaining bytes: \(data.truncated(to: 4).hexString)...") }
-        try readByte()
+        try skipByte()
     }
 }
