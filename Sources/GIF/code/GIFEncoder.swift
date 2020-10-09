@@ -55,10 +55,7 @@ struct GIFEncoder {
 
     private mutating func append(string: String) {
         // TODO: Use proper throws + exception here
-        var encoded = string.data(using: .utf8)!
-        assert(encoded.last == 0x00)
-        encoded.removeLast() // Remove null-terminator
-        data.append(encoded)
+        data.append(string.data(using: .utf8)!)
     }
 
     private mutating func append(color: Color) {
@@ -171,12 +168,14 @@ struct GIFEncoder {
     }
 
     private mutating func appendImageDataAsLZW(image: Image, quantization: ColorQuantization, width: Int, height: Int) {
+        log.info("Appending image data...")
+
         // Convert the ARGB-encoded image first to color
         // indices and then to LZW-compressed codes
         var encoder = LzwEncoder(colorCount: GIFConstants.colorCount)
         var lzwEncoded = BitData()
 
-        log.debug("LZW-encoding the frame...")
+        log.info("LZW-encoding the frame...")
         encoder.beginEncoding(into: &lzwEncoded)
 
         // Iterate all pixels as ARGB values and encode them
@@ -188,7 +187,7 @@ struct GIFEncoder {
 
         encoder.finishEncoding(into: &lzwEncoded)
 
-        log.debug("Appending the encoded frame, minCodeSize: \(encoder.minCodeSize)...")
+        log.info("Appending the encoded frame, minCodeSize: \(encoder.minCodeSize)...")
         append(byte: UInt8(encoder.minCodeSize))
 
         let lzwData = lzwEncoded.bytes
