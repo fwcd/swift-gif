@@ -181,7 +181,7 @@ struct GIFDecoder {
     }
 
     private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension? {
-        guard try peekBytes(count: 2) == [0x21, 0xF9] else { return nil }
+        guard try peekBytes(count: 2) == [GIFConstants.extensionIntroducer, GIFConstants.graphicsControlExtension] else { return nil }
         try skipBytes(count: 2)
         guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
 
@@ -208,7 +208,7 @@ struct GIFDecoder {
     }
 
     private mutating func readImageDescriptor() throws -> ImageDescriptor? {
-        guard try peekByte() == 0x2C else { return nil }
+        guard try peekByte() == GIFConstants.imageSeparator else { return nil }
         try skipByte()
 
         let imageLeft = try readShort()
@@ -295,7 +295,7 @@ struct GIFDecoder {
     }
 
     private mutating func readApplicationExtension() throws -> ApplicationExtension? {
-        guard try peekBytes(count: 2) == [0x21, 0xFF] else { return nil }
+        guard try peekBytes(count: 2) == [GIFConstants.extensionIntroducer, GIFConstants.applicationExtension] else { return nil }
         try skipBytes(count: 2)
         return try readLoopingExtension()
     }
@@ -312,7 +312,7 @@ struct GIFDecoder {
     }
 
     private mutating func readCommentExtension() throws -> String? {
-        guard try peekBytes(count: 2) == [0x21, 0xFE] else { return nil }
+        guard try peekBytes(count: 2) == [GIFConstants.extensionIntroducer, GIFConstants.commentExtension] else { return nil }
         try skipBytes(count: 2)
         guard let s = try String(data: readSubBlocks(), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Could not decode comment") }
         return s
