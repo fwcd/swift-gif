@@ -50,7 +50,11 @@ struct GIFEncoder {
     }
 
     private mutating func append(string: String) {
-        data.append(string.data(using: .utf8)!)
+        // TODO: Use proper throws + exception here
+        var encoded = string.data(using: .utf8)!
+        assert(encoded.last == 0x00)
+        encoded.removeLast() // Remove null-terminator
+        data.append(encoded)
     }
 
     private mutating func append(color: Color) {

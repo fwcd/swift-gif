@@ -67,12 +67,15 @@ struct GIFDecoder {
         return Color(red: red, green: green, blue: blue)
     }
 
-    private mutating func readString() throws -> String {
+    private mutating func readString(maxLength: Int = Int.max) throws -> String {
         var bytes = [UInt8]()
         while let byte = try? readByte(), byte != 0 {
             bytes.append(byte)
+            if bytes.count >= maxLength {
+                break
+            }
         }
-        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding }
+        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Not a UTF-8 string: \(bytes.map { String($0, radix: 16) }.joined(separator: " "))") }
         return s
     }
 
@@ -85,7 +88,8 @@ struct GIFDecoder {
     }
 
     private mutating func readHeader() throws {
-        guard try ["GIF89a", "GIF87a"].contains(readString()) else { throw GIFDecodingError.invalidHeader }
+        let header = try readString(maxLength: 6)
+        guard ["GIF89a", "GIF87a"].contains(header) else { throw GIFDecodingError.invalidHeader(header) }
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
@@ -241,8 +245,9 @@ struct GIFDecoder {
     }
 
     private mutating func readLoopingExtension() throws -> ApplicationExtension {
+        let netscape = "NETSCAPE2.0"
         try readByte() // Skip block size
-        guard try readString() == "NETSCAPE2.0" else { throw GIFDecodingError.invalidLoopingExtension }
+        guard try readString(maxLength: netscape.count) == netscape else { throw GIFDecodingError.invalidLoopingExtension }
         try readByte() // Skip block size
         guard try readByte() == 0x01 else { throw GIFDecodingError.invalidLoopingExtension }
         let loopCount = try readShort()
