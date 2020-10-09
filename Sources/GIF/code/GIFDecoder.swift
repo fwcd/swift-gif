@@ -176,16 +176,12 @@ struct GIFDecoder {
         )
     }
 
-    private func colorCount(colorResolution: UInt8) -> Int {
-        return 1 << (UInt(colorResolution) + 1) // = 2 ^ (N + 1), see http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html#graphics_control_extension_block
-    }
-
     private mutating func readColorTable(colorResolution: UInt8) throws -> ColorQuantization {
         log.trace("Reading color table...")
 
         var colorTable = [Color]()
 
-        for _ in 0..<colorCount(colorResolution: colorResolution) {
+        for _ in 0..<colorTableSizeOf(colorResolution: colorResolution) {
             try colorTable.append(readColor())
         }
 
@@ -267,7 +263,7 @@ struct GIFDecoder {
 
         // Perform actual decoding
         var lzwEncoded = BitData(from: [UInt8](lzwData))
-        var decoder = LzwDecoder(colorCount: colorCount(colorResolution: colorResolution), minCodeSize: Int(minCodeSize))
+        var decoder = LzwDecoder(colorCount: colorTableSizeOf(colorResolution: colorResolution), minCodeSize: Int(minCodeSize))
         var decoded = [Int]() // holds the color indices
 
         try decoder.beginDecoding(from: &lzwEncoded)

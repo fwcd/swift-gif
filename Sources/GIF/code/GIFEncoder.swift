@@ -22,7 +22,7 @@ struct GIFEncoder {
         append(logicalScreenDescriptor: gif.logicalScreenDescriptor)
 
         if let quantization = gif.globalQuantization {
-            append(colorTable: quantization.colorTable)
+            append(colorTable: quantization.colorTable, colorResolution: gif.logicalScreenDescriptor.colorResolution)
         }
 
         for applicationExtension in gif.applicationExtensions {
@@ -32,7 +32,7 @@ struct GIFEncoder {
         // TODO: Encode comment extensions
 
         for frame in gif.frames {
-            append(frame: frame, globalQuantization: gif.globalQuantization)
+            append(frame: frame, globalQuantization: gif.globalQuantization, colorResolution: gif.logicalScreenDescriptor.colorResolution)
         }
 
         appendTrailer()
@@ -143,10 +143,10 @@ struct GIFEncoder {
         log.info("Appended image descriptor")
     }
 
-    private mutating func append(colorTable: [Color]) {
+    private mutating func append(colorTable: [Color], colorResolution: UInt8) {
         log.debug("Appending color table...")
 
-        let maxColorBytes = GIFConstants.colorCount * GIFConstants.colorChannels
+        let maxColorBytes = colorTableSizeOf(colorResolution: colorResolution) * GIFConstants.colorChannels
         var i = 0
 
         for color in colorTable {
@@ -209,7 +209,7 @@ struct GIFEncoder {
 
     /// Appends a frame with the specified quantizer
     /// and delay time (in hundrets of a second).
-    private mutating func append(frame: Frame, globalQuantization: ColorQuantization? = nil) {
+    private mutating func append(frame: Frame, globalQuantization: ColorQuantization? = nil, colorResolution: UInt8) {
         let image = frame.image
 
         if let graphicsControlExtension = frame.graphicsControlExtension {
@@ -219,7 +219,7 @@ struct GIFEncoder {
         append(imageDescriptor: frame.imageDescriptor)
 
         if let quantization = frame.localQuantization {
-            append(colorTable: quantization.colorTable)
+            append(colorTable: quantization.colorTable, colorResolution: colorResolution)
         }
 
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
