@@ -1,6 +1,7 @@
 import Foundation
 import Logging
 import Graphics
+import Utils
 
 fileprivate let log = Logger(label: "GIF.GIFDecoder")
 
@@ -94,7 +95,7 @@ struct GIFDecoder {
                 break
             }
         }
-        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Not a UTF-8 string: \(bytes.map { String($0, radix: 16) }.joined(separator: " "))") }
+        guard let s = String(data: Data(bytes), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Not a UTF-8 string: \(bytes.hexString)") }
         return s
     }
 
@@ -293,6 +294,8 @@ struct GIFDecoder {
     }
 
     private mutating func readTrailer() throws {
-        guard try readByte() == GIFConstants.trailer else { throw GIFDecodingError.invalidTrailer }
+        let trailer = try peekByte()
+        guard trailer == GIFConstants.trailer else { throw GIFDecodingError.invalidTrailer("Remaining bytes: \(data.truncated(to: 4).hexString)...") }
+        try readByte()
     }
 }

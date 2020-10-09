@@ -1,7 +1,7 @@
 public enum GIFDecodingError: Error {
     case noMoreBytes
     case invalidHeader(String)
-    case invalidTrailer
+    case invalidTrailer(String)
     case invalidStringEncoding(String)
     case invalidBlockSize(String)
     case invalidBlockTerminator(String)
