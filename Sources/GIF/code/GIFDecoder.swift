@@ -46,7 +46,7 @@ struct GIFDecoder {
 
         try readTrailer()
 
-        log.info("Read GIF")
+        log.debug("Read GIF")
         return GIF(
             logicalScreenDescriptor: logicalScreenDescriptor,
             globalQuantization: globalQuantization,
@@ -133,7 +133,7 @@ struct GIFDecoder {
             }
         }
 
-        log.info("Read data sub-blocks...")
+        log.debug("Read data sub-blocks...")
         return subData
     }
 
@@ -143,7 +143,7 @@ struct GIFDecoder {
         let header = try readString(maxLength: 6)
         guard ["GIF89a", "GIF87a"].contains(header) else { throw GIFDecodingError.invalidHeader(header) }
 
-        log.info("Read header (\(header))")
+        log.debug("Read header (\(header))")
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
@@ -161,7 +161,7 @@ struct GIFDecoder {
         let backgroundColorIndex = try readByte()
         let pixelAspectRatio = try readByte()
 
-        log.info("Read logical screen descriptor (width: \(width), height: \(height), global color table: \(useGlobalColorTable), color resolution: \(String(colorResolution, radix: 2)), bg color index: \(backgroundColorIndex))")
+        log.debug("Read logical screen descriptor (width: \(width), height: \(height), global color table: \(useGlobalColorTable), color resolution: \(String(colorResolution, radix: 2)), bg color index: \(backgroundColorIndex))")
 
         return LogicalScreenDescriptor(
             width: width,
@@ -188,7 +188,7 @@ struct GIFDecoder {
             try colorTable.append(readColor())
         }
 
-        log.info("Read color table (\(colorTable.count) colors)")
+        log.debug("Read color table (\(colorTable.count) colors)")
 
         return OctreeQuantization(fromColors: colorTable)
     }
@@ -212,7 +212,7 @@ struct GIFDecoder {
 
         guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in graphics control extension") }
 
-        log.info("Read graphics control extension (disposal method: \(disposalMethod), delay time: \(delayTime), transparent: \(transparentColorFlag))")
+        log.debug("Read graphics control extension (disposal method: \(disposalMethod), delay time: \(delayTime), transparent: \(transparentColorFlag))")
 
         return GraphicsControlExtension(
             disposalMethod: disposalMethod,
@@ -241,7 +241,7 @@ struct GIFDecoder {
         packedField.skip(bits: 2)
         let sizeOfLocalColorTable = packedField.read(bits: 3)
 
-        log.info("Read image descriptor (left: \(imageLeft), top: \(imageTop), width: \(imageWidth), height: \(imageHeight), local color table: \(useLocalColorTable)))")
+        log.debug("Read image descriptor (left: \(imageLeft), top: \(imageTop), width: \(imageWidth), height: \(imageHeight), local color table: \(useLocalColorTable)))")
 
         return ImageDescriptor(
             imageLeft: imageLeft,
@@ -282,7 +282,7 @@ struct GIFDecoder {
             }
         }
 
-        log.info("Read image data (\(lzwData.count) bytes LZW-encoded, \(width * height) pixels)")
+        log.debug("Read image data (\(lzwData.count) bytes LZW-encoded, \(width * height) pixels)")
 
         return image
     }
@@ -310,7 +310,7 @@ struct GIFDecoder {
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
         let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution)
 
-        log.info("Read frame")
+        log.debug("Read frame")
 
         return Frame(
             image: image,
