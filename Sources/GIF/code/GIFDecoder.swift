@@ -142,9 +142,7 @@ struct GIFDecoder {
         let height = try readShort()
 
         var packedField = try readPackedField()
-        print("Packed: \(String(packedField.rawValue, radix: 2))")
         let useGlobalColorTable = packedField.read()
-        print("Use: \(useGlobalColorTable)")
         let colorResolution = packedField.read(bits: 3)
         let sortFlag = packedField.read()
         let sizeOfGlobalColorTable = packedField.read(bits: 3)
