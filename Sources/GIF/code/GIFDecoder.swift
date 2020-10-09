@@ -47,6 +47,7 @@ struct GIFDecoder {
         try readTrailer()
 
         log.debug("Read GIF")
+
         return GIF(
             logicalScreenDescriptor: logicalScreenDescriptor,
             globalQuantization: globalQuantization,
