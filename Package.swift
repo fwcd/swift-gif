@@ -35,7 +35,7 @@ let package = Package(
                 .target(name: "GIF")
             ],
             resources: [
-                .process("Resources/mandelbrot.gif")
+                .copy("Resources")
             ]
         )
     ]
