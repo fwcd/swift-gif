@@ -21,6 +21,8 @@ struct GIFDecoder {
 
         if logicalScreenDescriptor.useGlobalColorTable {
             globalQuantization = try readColorTable(colorResolution: logicalScreenDescriptor.colorResolution)
+        } else {
+            log.info("No global color table!")
         }
 
         var applicationExtensions = [ApplicationExtension]()
@@ -140,7 +142,9 @@ struct GIFDecoder {
         let height = try readShort()
 
         var packedField = try readPackedField()
+        print("Packed: \(String(packedField.rawValue, radix: 2))")
         let useGlobalColorTable = packedField.read()
+        print("Use: \(useGlobalColorTable)")
         let colorResolution = packedField.read(bits: 3)
         let sortFlag = packedField.read()
         let sizeOfGlobalColorTable = packedField.read(bits: 3)
@@ -180,6 +184,7 @@ struct GIFDecoder {
         guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
 
         var packedField = try readPackedField()
+        packedField.skip(bits: 3)
         let disposalMethodRaw = packedField.read(bits: 3)
         guard let disposalMethod = DisposalMethod(rawValue: disposalMethodRaw) else { throw GIFDecodingError.invalidDisposalMethod(disposalMethodRaw) }
         let userInputFlag = packedField.read()
@@ -268,6 +273,8 @@ struct GIFDecoder {
 
         if imageDescriptor.useLocalColorTable {
             localQuantization = try readColorTable(colorResolution: colorResolution)
+        } else {
+            log.info("No local color table!")
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
