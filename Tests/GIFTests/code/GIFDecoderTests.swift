@@ -7,7 +7,7 @@ final class GIFDecoderTests: XCTestCase {
     ]
 
     func testGIFDecoder() throws {
-        for resource in ["spin", "mandelbrot"] {
+        for resource in ["mandelbrot"] {
             let url = Bundle.module.url(forResource: resource, withExtension: "gif")!
             let data = try Data(contentsOf: url)
             let gif = try GIF(data: data)
