@@ -138,6 +138,7 @@ struct GIFDecoder {
         let backgroundColorIndex = try readByte()
 
         guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in graphics control extension") }
+
         return GraphicsControlExtension(
             disposalMethod: disposalMethod,
             userInputFlag: userInputFlag,
@@ -148,8 +149,30 @@ struct GIFDecoder {
     }
 
     private mutating func readImageDescriptor() throws -> ImageDescriptor {
-        // TODO
-        fatalError("TODO")
+        guard try readByte() == 0x2C else { throw GIFDecodingError.invalidImageSeparator("at the beginning of an image descriptor") }
+
+        let imageLeft = try readShort()
+        let imageTop = try readShort()
+        let imageWidth = try readShort()
+        let imageHeight = try readShort()
+
+        var packedField = try readPackedField()
+        let useLocalColorTable = packedField.read()
+        let interlaceFlag = packedField.read()
+        let sortFlag = packedField.read()
+        packedField.skip(bits: 2)
+        let sizeOfLocalColorTable = packedField.read(bits: 3)
+
+        return ImageDescriptor(
+            imageLeft: imageLeft,
+            imageTop: imageTop,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight,
+            useLocalColorTable: useLocalColorTable,
+            interlaceFlag: interlaceFlag,
+            sortFlag: sortFlag,
+            sizeOfLocalColorTable: sizeOfLocalColorTable
+        )
     }
 
     private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int) throws -> Image {
