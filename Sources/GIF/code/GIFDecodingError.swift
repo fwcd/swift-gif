@@ -9,5 +9,6 @@ public enum GIFDecodingError: Error {
     case invalidImageSeparator(String)
     case invalidLoopingExtension
     case invalidGraphicsControlExtension
+    case missingImageDescriptor
     case noQuantizationForDecodingImage
 }

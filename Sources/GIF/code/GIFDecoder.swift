@@ -57,6 +57,11 @@ struct GIFDecoder {
         return byte
     }
 
+    private func peekByte() throws -> UInt8 {
+        guard let byte = data.first else { throw GIFDecodingError.noMoreBytes }
+        return byte
+    }
+
     private mutating func readPackedField() throws -> PackedFieldByte {
         try PackedFieldByte(rawValue: readByte())
     }
@@ -65,6 +70,12 @@ struct GIFDecoder {
     private mutating func readShort() throws -> UInt16 {
         let lower = try readByte()
         let higher = try readByte()
+        return (UInt16(higher) << 8) | UInt16(lower)
+    }
+
+    private func peekShort() throws -> UInt16 {
+        let lower = try peekByte()
+        let higher = try peekByte()
         return (UInt16(higher) << 8) | UInt16(lower)
     }
 
@@ -93,6 +104,17 @@ struct GIFDecoder {
             try bytes.append(readByte())
         }
         return bytes
+    }
+
+    private mutating func readSubBlocks() throws -> Data {
+        var subData = Data()
+        while let subBlockByteCount = try? readByte(), subBlockByteCount != 0x00 {
+            // TODO: Improve performance by using copyBytes (or similar) and unsafe pointers?
+            for _ in 0..<subBlockByteCount {
+                try subData.append(readByte())
+            }
+        }
+        return subData
     }
 
     private mutating func readHeader() throws {
@@ -139,8 +161,9 @@ struct GIFDecoder {
         return OctreeQuantization(fromColors: colorTable)
     }
 
-    private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension {
-        guard try readBytes(count: 2) == [0x21, 0xF9] else { throw GIFDecodingError.invalidGraphicsControlExtension }
+    private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension? {
+        guard try peekShort() == 0x21F9 else { return nil }
+        try readShort()
         guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
 
         var packedField = try readPackedField()
@@ -163,9 +186,9 @@ struct GIFDecoder {
         )
     }
 
-    private mutating func readImageDescriptor() throws -> ImageDescriptor {
-        let imageSeparator = try readByte()
-        guard imageSeparator == 0x2C else { throw GIFDecodingError.invalidImageSeparator("at the beginning of an image descriptor, got 0x\(String(imageSeparator, radix: 16))") }
+    private mutating func readImageDescriptor() throws -> ImageDescriptor? {
+        guard try peekByte() == 0x2C else { return nil }
+        try readByte()
 
         let imageLeft = try readShort()
         let imageTop = try readShort()
@@ -196,16 +219,7 @@ struct GIFDecoder {
         let minCodeSize = try readByte()
 
         // Read data sub-blocks
-        var lzwData = Data()
-
-        while let subBlockByteCount = try? readByte(), subBlockByteCount != 0x00 {
-            // TODO: Improve performance by using copyBytes (or similar) and unsafe pointers?
-            for _ in 0..<subBlockByteCount {
-                try lzwData.append(readByte())
-            }
-        }
-
-        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in image data") }
+        let lzwData = try readSubBlocks()
 
         // Perform actual decoding
         var lzwEncoded = BitData(from: [UInt8](lzwData))
@@ -229,8 +243,14 @@ struct GIFDecoder {
     }
 
     private mutating func readFrame(colorResolution: UInt8, globalQuantization: ColorQuantization?) throws -> Frame? {
-        let graphicsControlExtension = try? readGraphicsControlExtension()
-        let imageDescriptor = try readImageDescriptor()
+        let graphicsControlExtension = try readGraphicsControlExtension()
+        guard let imageDescriptor = try readImageDescriptor() else {
+            if graphicsControlExtension == nil {
+                return nil
+            } else {
+                throw GIFDecodingError.missingImageDescriptor
+            }
+        }
         var localQuantization: ColorQuantization?
 
         if imageDescriptor.useLocalColorTable {
@@ -249,8 +269,9 @@ struct GIFDecoder {
     }
 
     private mutating func readApplicationExtension() throws -> ApplicationExtension? {
-        guard try readShort() == 0x21FF else { return nil }
-        return try? readLoopingExtension()
+        guard try peekShort() == 0x21FF else { return nil }
+        try readShort()
+        return try readLoopingExtension()
     }
 
     private mutating func readLoopingExtension() throws -> ApplicationExtension {
@@ -262,6 +283,13 @@ struct GIFDecoder {
         let loopCount = try readShort()
         guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in looping extension") }
         return .looping(loopCount: loopCount)
+    }
+
+    private mutating func readCommentExtension() throws -> String? {
+        guard try peekShort() == 0x21FE else { return nil }
+        try readShort()
+        guard let s = try String(data: readSubBlocks(), encoding: .utf8) else { throw GIFDecodingError.invalidStringEncoding("Could not decode comment") }
+        return s
     }
 
     private mutating func readTrailer() throws {
