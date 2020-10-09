@@ -28,7 +28,7 @@ struct GIFDecoder {
         var applicationExtensions = [ApplicationExtension]()
         var frames = [Frame]()
 
-        while true {
+        while try peekByte() != GIFConstants.trailer {
             var foundSomething = false
 
             if let applicationExtension = try readApplicationExtension() {
@@ -41,7 +41,7 @@ struct GIFDecoder {
                 foundSomething = true
             }
 
-            guard foundSomething else { break }
+            guard foundSomething else { throw GIFDecodingError.unrecognizedBlock("Did not recognize this block: \(data.prefix(8).hexString)...") }
         }
 
         try readTrailer()
@@ -123,6 +123,8 @@ struct GIFDecoder {
     }
 
     private mutating func readSubBlocks() throws -> Data {
+        log.trace("Reading data sub-blocks...")
+
         var subData = Data()
         while let subBlockByteCount = try? readByte(), subBlockByteCount != 0x00 {
             // TODO: Improve performance by using copyBytes (or similar) and unsafe pointers?
@@ -130,16 +132,23 @@ struct GIFDecoder {
                 try subData.append(readByte())
             }
         }
+
+        log.info("Read data sub-blocks...")
         return subData
     }
 
     private mutating func readHeader() throws {
+        log.trace("Reading header...")
+
         let header = try readString(maxLength: 6)
         guard ["GIF89a", "GIF87a"].contains(header) else { throw GIFDecodingError.invalidHeader(header) }
+
         log.info("Read header (\(header))")
     }
 
     private mutating func readLogicalScreenDescriptor() throws -> LogicalScreenDescriptor {
+        log.trace("Reading logical screen descriptor...")
+
         let width = try readShort()
         let height = try readShort()
 
@@ -153,6 +162,7 @@ struct GIFDecoder {
         let pixelAspectRatio = try readByte()
 
         log.info("Read logical screen descriptor (width: \(width), height: \(height), global color table: \(useGlobalColorTable), color resolution: \(String(colorResolution, radix: 2)), bg color index: \(backgroundColorIndex))")
+
         return LogicalScreenDescriptor(
             width: width,
             height: height,
@@ -170,6 +180,8 @@ struct GIFDecoder {
     }
 
     private mutating func readColorTable(colorResolution: UInt8) throws -> ColorQuantization {
+        log.trace("Reading color table...")
+
         var colorTable = [Color]()
 
         for _ in 0..<colorCount(colorResolution: colorResolution) {
@@ -177,6 +189,7 @@ struct GIFDecoder {
         }
 
         log.info("Read color table (\(colorTable.count) colors)")
+
         return OctreeQuantization(fromColors: colorTable)
     }
 
@@ -184,6 +197,8 @@ struct GIFDecoder {
         guard try peekBytes(count: 2) == [GIFConstants.extensionIntroducer, GIFConstants.graphicsControlExtension] else { return nil }
         try skipBytes(count: 2)
         guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
+
+        log.trace("Reading graphics control extension...")
 
         var packedField = try readPackedField()
         packedField.skip(bits: 3)
@@ -198,6 +213,7 @@ struct GIFDecoder {
         guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in graphics control extension") }
 
         log.info("Read graphics control extension (disposal method: \(disposalMethod), delay time: \(delayTime), transparent: \(transparentColorFlag))")
+
         return GraphicsControlExtension(
             disposalMethod: disposalMethod,
             userInputFlag: userInputFlag,
@@ -210,6 +226,8 @@ struct GIFDecoder {
     private mutating func readImageDescriptor() throws -> ImageDescriptor? {
         guard try peekByte() == GIFConstants.imageSeparator else { return nil }
         try skipByte()
+
+        log.trace("Reading image descriptor...")
 
         let imageLeft = try readShort()
         let imageTop = try readShort()
@@ -224,6 +242,7 @@ struct GIFDecoder {
         let sizeOfLocalColorTable = packedField.read(bits: 3)
 
         log.info("Read image descriptor (left: \(imageLeft), top: \(imageTop), width: \(imageWidth), height: \(imageHeight), local color table: \(useLocalColorTable)))")
+
         return ImageDescriptor(
             imageLeft: imageLeft,
             imageTop: imageTop,
@@ -237,6 +256,8 @@ struct GIFDecoder {
     }
 
     private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int, colorResolution: UInt8) throws -> Image {
+        log.trace("Reading image data...")
+
         // Read beginning of image block
         let minCodeSize = try readByte()
 
@@ -262,6 +283,7 @@ struct GIFDecoder {
         }
 
         log.info("Read image data (\(lzwData.count) bytes LZW-encoded, \(width * height) pixels)")
+
         return image
     }
 
@@ -274,6 +296,9 @@ struct GIFDecoder {
                 throw GIFDecodingError.missingImageDescriptor
             }
         }
+
+        log.trace("Reading frame...")
+
         var localQuantization: ColorQuantization?
 
         if imageDescriptor.useLocalColorTable {
@@ -286,6 +311,7 @@ struct GIFDecoder {
         let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution)
 
         log.info("Read frame")
+
         return Frame(
             image: image,
             imageDescriptor: imageDescriptor,
