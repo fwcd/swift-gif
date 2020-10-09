@@ -22,7 +22,7 @@ struct LzwTableMeta {
             return size
         }()
         self.minCodeSize = minCodeSize
-        assert(minCodeSize >= colorCount)
+        assert((1 << minCodeSize) >= colorCount)
         minCount = (1 << minCodeSize) + 2
 
         clearCode = 1 << minCodeSize
