@@ -100,8 +100,8 @@ struct GIFDecoder {
         return s
     }
 
-    private func skipByte() throws {
-        guard !data.isEmpty else { throw GIFDecodingError.noMoreBytes }
+    private mutating func skipByte() throws {
+        try skipBytes(count: 1)
     }
 
     private mutating func skipBytes(count: Int) throws {
