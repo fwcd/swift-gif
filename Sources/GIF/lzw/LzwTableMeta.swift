@@ -8,16 +8,21 @@ struct LzwTableMeta {
     public private(set) var count: Int
     public private(set) var codeSize: Int
 
-    public init(colorCount: Int) {
+    public init(colorCount: Int, minCodeSize: Int? = nil) {
         self.colorCount = colorCount
 
-        // Find the smallest power of two that is
-        // greater than or equal to the color count
-        var size = 2
-        while (1 << size) < colorCount {
-            size += 1
-        }
-        minCodeSize = size
+        let minCodeSize = minCodeSize ?? {
+            // Find the smallest power of two that is
+            // greater than or equal to the color count
+            var size = 2
+            while (1 << size) < colorCount {
+                size += 1
+            }
+
+            return size
+        }()
+        self.minCodeSize = minCodeSize
+        assert(minCodeSize >= colorCount)
         minCount = (1 << minCodeSize) + 2
 
         clearCode = 1 << minCodeSize

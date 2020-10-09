@@ -25,12 +25,12 @@ struct GIFDecoder {
         var applicationExtensions = [ApplicationExtension]()
         var frames = [Frame]()
 
-        while let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
-            frames.append(frame)
-        }
-
         while let applicationExtension = try readApplicationExtension() {
             applicationExtensions.append(applicationExtension)
+        }
+
+        while let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
+            frames.append(frame)
         }
 
         try readTrailer()
@@ -113,11 +113,14 @@ struct GIFDecoder {
         )
     }
 
+    private func colorCount(colorResolution: UInt8) -> Int {
+        return 1 << (UInt(colorResolution) + 1) // = 2 ^ (N + 1), see http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html#graphics_control_extension_block
+    }
+
     private mutating func readColorTable(colorResolution: UInt8) throws -> ColorQuantization {
-        let colorCount = 1 << (UInt(colorResolution) + 1) // = 2 ^ (N + 1), see http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html#graphics_control_extension_block
         var colorTable = [Color]()
 
-        for _ in 0..<colorCount {
+        for _ in 0..<colorCount(colorResolution: colorResolution) {
             try colorTable.append(readColor())
         }
 
@@ -175,9 +178,41 @@ struct GIFDecoder {
         )
     }
 
-    private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int) throws -> Image {
-        // TODO
-        fatalError("TODO")
+    private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int, colorResolution: UInt8) throws -> Image {
+        // Read beginning of image block
+        let minCodeSize = try readByte()
+
+        // Read data sub-blocks
+        var lzwData = Data()
+
+        while let subBlockByteCount = try? readByte(), subBlockByteCount != 0x00 {
+            // TODO: Improve performance by using copyBytes (or similar) and unsafe pointers?
+            for _ in 0..<subBlockByteCount {
+                try lzwData.append(readByte())
+            }
+        }
+
+        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in image data") }
+
+        // Perform actual decoding
+        var lzwEncoded = BitData(from: [UInt8](lzwData))
+        var decoder = LzwDecoder(colorCount: colorCount(colorResolution: colorResolution), minCodeSize: Int(minCodeSize))
+        var decoded = [Int]() // holds the color indices
+
+        try decoder.beginDecoding(from: &lzwEncoded)
+        while try decoder.decodeAndAppend(from: &lzwEncoded, into: &decoded) {}
+
+        // Decode the color indices to actual (A)RGB colors and write them into an image
+        let colorTable = quantization.colorTable
+        var image = try Image(width: width, height: height)
+
+        for y in 0..<height {
+            for x in 0..<width {
+                image[y, x] = colorTable[decoded[(y * width) + x]]
+            }
+        }
+
+        return image
     }
 
     private mutating func readFrame(colorResolution: UInt8, globalQuantization: ColorQuantization?) throws -> Frame? {
@@ -190,7 +225,7 @@ struct GIFDecoder {
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
-        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight))
+        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution)
 
         return Frame(
             image: image,

@@ -10,8 +10,8 @@ struct LzwDecoderTable: CustomStringConvertible {
 	public var meta: LzwTableMeta
 	public var description: String { "\(entries)" }
 
-    public init(colorCount: Int) {
-        meta = LzwTableMeta(colorCount: colorCount)
+    public init(colorCount: Int, minCodeSize: Int? = nil) {
+        meta = LzwTableMeta(colorCount: colorCount, minCodeSize: minCodeSize)
     }
 
     public subscript(_ code: Int) -> [Int]? {

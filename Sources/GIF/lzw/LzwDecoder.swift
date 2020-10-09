@@ -10,8 +10,8 @@ struct LzwDecoder {
 
     public var minCodeSize: Int { return table.meta.minCodeSize }
 
-    public init(colorCount: Int) {
-        table = LzwDecoderTable(colorCount: colorCount)
+    public init(colorCount: Int, minCodeSize: Int? = nil) {
+        table = LzwDecoderTable(colorCount: colorCount, minCodeSize: minCodeSize)
     }
 
     public mutating func beginDecoding(from data: inout BitData) throws {
