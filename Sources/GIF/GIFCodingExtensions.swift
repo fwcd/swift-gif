@@ -7,12 +7,7 @@ extension GIF {
     public init(data: Data) throws {
         var decoder = try GIFDecoder(data: data)
         let gif = try decoder.readGIF()
-        self.init(
-            logicalScreenDescriptor: gif.logicalScreenDescriptor,
-            globalQuantization: gif.globalQuantization,
-            applicationExtensions: gif.applicationExtensions,
-            frames: gif.frames
-        )
+        self.init(copyOf: gif)
     }
 
     public func encoded() throws -> Data {

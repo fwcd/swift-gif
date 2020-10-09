@@ -29,6 +29,8 @@ struct GIFEncoder {
             append(applicationExtension: applicationExtension)
         }
 
+        // TODO: Encode comment extensions
+
         for frame in gif.frames {
             append(frame: frame, globalQuantization: gif.globalQuantization)
         }

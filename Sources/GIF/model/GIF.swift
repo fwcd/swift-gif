@@ -6,6 +6,7 @@ public struct GIF {
     public var logicalScreenDescriptor: LogicalScreenDescriptor
     public var globalQuantization: ColorQuantization?
     public var applicationExtensions: [ApplicationExtension]
+    public var commentExtensions: [String]
     public var frames: [Frame] {
         didSet {
             for i in 0..<frames.count {
@@ -68,11 +69,23 @@ public struct GIF {
         logicalScreenDescriptor: LogicalScreenDescriptor,
         globalQuantization: ColorQuantization? = nil,
         applicationExtensions: [ApplicationExtension] = [],
+        commentExtensions: [String] = [],
         frames: [Frame] = []
     ) {
         self.logicalScreenDescriptor = logicalScreenDescriptor
         self.globalQuantization = globalQuantization
         self.applicationExtensions = applicationExtensions
+        self.commentExtensions = commentExtensions
         self.frames = frames
+    }
+
+    init(copyOf gif: GIF) {
+        self.init(
+            logicalScreenDescriptor: gif.logicalScreenDescriptor,
+            globalQuantization: gif.globalQuantization,
+            applicationExtensions: gif.applicationExtensions,
+            commentExtensions: gif.commentExtensions,
+            frames: gif.frames
+        )
     }
 }
