@@ -3,8 +3,10 @@ public enum GIFDecodingError: Error {
     case invalidHeader
     case invalidTrailer
     case invalidStringEncoding
-    case invalidBlockSize
-    case invalidBlockTerminator
+    case invalidBlockSize(String)
+    case invalidBlockTerminator(String)
+    case invalidDisposalMethod(UInt8)
     case invalidLoopingExtension
+    case invalidGraphicsControlExtension
     case noQuantizationForDecodingImage
 }

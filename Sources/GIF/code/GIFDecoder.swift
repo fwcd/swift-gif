@@ -125,8 +125,26 @@ struct GIFDecoder {
     }
 
     private mutating func readGraphicsControlExtension() throws -> GraphicsControlExtension {
-        // TODO
-        fatalError("TODO")
+        guard try readBytes(count: 2) == [0x21, 0xF9] else { throw GIFDecodingError.invalidGraphicsControlExtension }
+        guard try readByte() == 0x04 else { throw GIFDecodingError.invalidBlockSize("in graphics control extension") }
+
+        var packedField = try readPackedField()
+        let disposalMethodRaw = packedField.read(bits: 3)
+        guard let disposalMethod = DisposalMethod(rawValue: disposalMethodRaw) else { throw GIFDecodingError.invalidDisposalMethod(disposalMethodRaw) }
+        let userInputFlag = packedField.read()
+        let transparentColorFlag = packedField.read()
+
+        let delayTime = try readShort()
+        let backgroundColorIndex = try readByte()
+
+        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in graphics control extension") }
+        return GraphicsControlExtension(
+            disposalMethod: disposalMethod,
+            userInputFlag: userInputFlag,
+            transparentColorFlag: transparentColorFlag,
+            delayTime: delayTime,
+            backgroundColorIndex: backgroundColorIndex
+        )
     }
 
     private mutating func readImageDescriptor() throws -> ImageDescriptor {
@@ -170,7 +188,7 @@ struct GIFDecoder {
         try readByte() // Skip block size
         guard try readByte() == 0x01 else { throw GIFDecodingError.invalidLoopingExtension }
         let loopCount = try readShort()
-        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator }
+        guard try readByte() == 0x00 else { throw GIFDecodingError.invalidBlockTerminator("in looping extension") }
         return .looping(loopCount: loopCount)
     }
 
