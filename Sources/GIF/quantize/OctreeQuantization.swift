@@ -7,10 +7,11 @@ import Logging
 fileprivate let log = Logger(label: "GIF.OctreeQuantization")
 fileprivate let maxDepth = 8 // bits in a byte (of each color channel)
 
-/**
- * A quantization that uses an octree
- * in RGB color space.
- */
+/// A quantization that uses an octree
+/// in RGB color space. Can both be used for
+/// quantizing an image and for efficiently
+/// querying an existing color table by taking
+/// advantage of the near-constant time lookup.
 public struct OctreeQuantization: ColorQuantization {
     private class OctreeNode: Hashable, CustomStringConvertible {
         private var red: UInt = 0
@@ -61,7 +62,7 @@ public struct OctreeQuantization: ColorQuantization {
             return Int(leftRed | leftGreen | leftBlue)
         }
 
-        func insert(color insertedColor: Color) {
+        func insert(color insertedColor: Color, colorTableIndex: Int? = nil) {
             if depth == maxDepth {
                 red = UInt(insertedColor.red)
                 green = UInt(insertedColor.green)
@@ -71,8 +72,9 @@ public struct OctreeQuantization: ColorQuantization {
                 let i = childIndex(of: insertedColor)
                 if childs[i] == nil {
                     childs[i] = OctreeNode(depth: depth + 1)
+                    childs[i]!.colorTableIndex = colorTableIndex
                 }
-                childs[i]!.insert(color: insertedColor)
+                childs[i]!.insert(color: insertedColor, colorTableIndex: colorTableIndex)
             }
         }
 
@@ -93,10 +95,8 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        /**
-        * "Mixes" all child nodes in this node. This method assumes all children are leaves
-        * and returns the number of reduced leaves.
-        */
+        /// "Mixes" all child nodes in this node. This method assumes all children are leaves
+        /// and returns the number of reduced leaves.
         @discardableResult
         func reduce() -> Int {
             var reduced = 0
@@ -127,7 +127,7 @@ public struct OctreeQuantization: ColorQuantization {
             }
         }
 
-        /** Performs a pre-order traversal on this octree. */
+        /// Performs a pre-order traversal on this octree.
         func walk(onNode: (OctreeNode) -> Void) {
             onNode(self)
             for child in childs {
@@ -140,11 +140,9 @@ public struct OctreeQuantization: ColorQuantization {
         func hash(into hasher: inout Hasher) { hasher.combine(ObjectIdentifier(self)) }
     }
 
-    /**
-    * A wrapper around a reducible octree node that
-    * defines comparability and equatability via the
-    * sum of child refs.
-    */
+    /// A wrapper around a reducible octree node that
+    /// defines comparability and equatability via the
+    /// sum of child refs.
     private struct QueuedReducibleNode: Comparable {
         let inner: OctreeNode
 
@@ -158,6 +156,8 @@ public struct OctreeQuantization: ColorQuantization {
     private var octree: OctreeNode
     public private(set) var colorTable: [Color]
 
+    /// Creates an octree, inserts the image's colors and reduces
+    /// the tree until only `colorCount` colors are left.
     public init(fromImage image: Image, colorCount: Int) {
         colorTable = []
         octree = OctreeNode(depth: 0)
@@ -214,6 +214,18 @@ public struct OctreeQuantization: ColorQuantization {
 
         log.debug("Filling color table")
         octree.fill(colorTable: &colorTable)
+    }
+
+    /// Creates an octree without performing any reductions from the
+    /// given color table.
+    public init(fromColors colors: [Color]) {
+        colorTable = colors
+        octree = OctreeNode(depth: 0)
+
+        log.debug("Inserting colors")
+        for (i, color) in colors.enumerated() {
+            octree.insert(color: color, colorTableIndex: i)
+        }
     }
 
     public func quantize(color: Color) -> Int {

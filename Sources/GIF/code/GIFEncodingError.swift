@@ -1,6 +1,6 @@
 import Graphics
 
-public enum AnimatedGIFError: Error {
+public enum GIFEncodingError: Error {
     // frameWidth, frameHeight, width, height
     case frameSizeMismatch(Int, Int, Int, Int)
 

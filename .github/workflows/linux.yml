@@ -15,7 +15,5 @@ jobs:
       run: git clone --depth 1 https://github.com/kylef/swiftenv.git ~/.swiftenv
     - name: Install Swift
       run: ~/.swiftenv/bin/swiftenv install ${{ matrix.swift }}
-    - name: Build
-      run: ~/.swiftenv/shims/swift build
     - name: Test
-      run: ~/.swiftenv/shims/swift test
+      run: ~/.swiftenv/shims/swift test -c release -Xswiftc -enable-testing

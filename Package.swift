@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -15,8 +15,8 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.0"),
-        .package(url: "https://github.com/fwcd/swift-utils.git", from: "1.0.0"),
-        .package(url: "https://github.com/fwcd/swift-graphics.git", .revision("19a7abdbbc5af8f55fb0d1e27a5d03c336f54779"))
+        .package(url: "https://github.com/fwcd/swift-utils.git", .revision("b68ef50b209562195ad33693564baaeb7574d809")),
+        .package(url: "https://github.com/fwcd/swift-graphics.git", .revision("b889c8af7f791abd1a303f001842077093401697"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -31,7 +31,12 @@ let package = Package(
         ),
         .testTarget(
             name: "GIFTests",
-            dependencies: ["GIF"]
+            dependencies: [
+                .target(name: "GIF")
+            ],
+            resources: [
+                .copy("Resources")
+            ]
         )
     ]
 )

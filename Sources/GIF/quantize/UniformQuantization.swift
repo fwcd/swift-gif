@@ -1,13 +1,11 @@
 import Foundation
 import Graphics
 
-/** Color channels, assuming RGB colors. */
+/// Color channels, assuming RGB colors.
 fileprivate let CHANNELS = 3
 
-/**
- * A quantization where all colors are evenly
- * spaced along each channel.
- */
+/// A quantization where all colors are evenly
+/// spaced along each channel.
 public struct UniformQuantization: ColorQuantization {
     public private(set) var colorTable: [Color]
     private let colorsPerChannel: Int
