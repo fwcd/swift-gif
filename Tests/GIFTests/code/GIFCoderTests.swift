@@ -40,7 +40,7 @@ final class GIFCoderTests: XCTestCase {
                 let color1 = image1[y, x]
                 let color2 = image2[y, x]
 
-                // Only perform assertion on fully non-transparent
+                // Only assert equality on fully non-transparent
                 // pixels since these not affected by GIFs (potentially
                 // lossy) encoding of transparent pixels.
                 if color1.alpha == 255 && color2.alpha == 255 {
