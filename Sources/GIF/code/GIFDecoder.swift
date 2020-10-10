@@ -313,6 +313,7 @@ struct GIFDecoder {
 
         log.trace("Reading frame...")
 
+        let actualBackgroundColorIndex = (graphicsControlExtension?.backgroundColorIndex).filter { _ in imageDescriptor.useLocalColorTable } ?? backgroundColorIndex
         var localQuantization: ColorQuantization?
 
         if imageDescriptor.useLocalColorTable {
@@ -322,7 +323,7 @@ struct GIFDecoder {
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
-        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution, backgroundColorIndex: backgroundColorIndex)
+        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution, backgroundColorIndex: actualBackgroundColorIndex)
 
         log.debug("Read frame")
 

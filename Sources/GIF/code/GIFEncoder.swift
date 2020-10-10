@@ -221,9 +221,14 @@ struct GIFEncoder {
         backgroundColorIndex: UInt8
     ) {
         let image = frame.image
+        var actualBackgroundColorIndex = backgroundColorIndex
 
         if let graphicsControlExtension = frame.graphicsControlExtension {
             append(graphicsControlExtension: graphicsControlExtension)
+
+            if frame.imageDescriptor.useLocalColorTable {
+                actualBackgroundColorIndex = graphicsControlExtension.backgroundColorIndex
+            }
         }
 
         append(imageDescriptor: frame.imageDescriptor)
@@ -233,7 +238,7 @@ struct GIFEncoder {
         }
 
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
-        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: backgroundColorIndex)
+        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: actualBackgroundColorIndex)
 
         log.debug("Appended frame")
     }
