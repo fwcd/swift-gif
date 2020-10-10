@@ -214,14 +214,16 @@ public struct OctreeQuantization: ColorQuantization {
 
     /// Creates an octree without performing any reductions from the
     /// given color table.
-    public init(fromColors colorTable: [Color]) {
-        self.colorTable = colorTable
+    public init(fromColors colors: [Color]) {
+        colorTable = []
         octree = OctreeNode(depth: 0)
 
         log.debug("Inserting colors")
-        for color in colorTable {
+        for color in colors {
             octree.insert(color: color)
         }
+
+        octree.fill(colorTable: &colorTable)
     }
 
     public func quantize(color: Color) -> Int {
