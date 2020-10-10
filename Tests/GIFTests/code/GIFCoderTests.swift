@@ -37,7 +37,15 @@ final class GIFCoderTests: XCTestCase {
 
         for y in 0..<image1.height {
             for x in 0..<image1.width {
-                XCTAssertEqual(image1[y, x], image2[y, x])
+                let color1 = image1[y, x]
+                let color2 = image2[y, x]
+
+                // Only perform assertion on fully non-transparent
+                // pixels since these not affected by GIFs (potentially
+                // lossy) encoding of transparent pixels.
+                if color1.alpha == 255 && color2.alpha == 255 {
+                    XCTAssertEqual(color1, color2)
+                }
             }
         }
     }
