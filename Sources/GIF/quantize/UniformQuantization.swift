@@ -11,7 +11,7 @@ public struct UniformQuantization: ColorQuantization {
     private let colorsPerChannel: Int
     private let colorStride: Int
 
-    public init(fromImage image: Image, colorCount: Int) {
+    public init(fromImage image: Image, colorCount: Int = GIFConstants.colorCount) {
         colorTable = []
         colorsPerChannel = Int(pow(Double(colorCount), 1.0 / Double(CHANNELS)))
         colorStride = 256 / colorsPerChannel

@@ -158,7 +158,7 @@ public struct OctreeQuantization: ColorQuantization {
 
     /// Creates an octree, inserts the image's colors and reduces
     /// the tree until only `colorCount` colors are left.
-    public init(fromImage image: Image, colorCount: Int) {
+    public init(fromImage image: Image, colorCount: Int = GIFConstants.colorCount) {
         colorTable = []
         octree = OctreeNode(depth: 0)
 
