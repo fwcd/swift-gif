@@ -37,7 +37,7 @@ public struct GIF {
     }
 
     // High-level initializers
-    public init(width: Int, height: Int, loopCount: Int? = nil, globalQuantization: ColorQuantization? = nil) {
+    public init(width: Int, height: Int, loopCount: Int? = 0, globalQuantization: ColorQuantization? = nil) {
         self.init(
             logicalScreenDescriptor: LogicalScreenDescriptor(
                 width: UInt16(width),
