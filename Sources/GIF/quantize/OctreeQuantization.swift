@@ -8,7 +8,10 @@ fileprivate let log = Logger(label: "GIF.OctreeQuantization")
 fileprivate let maxDepth = 8 // bits in a byte (of each color channel)
 
 /// A quantization that uses an octree
-/// in RGB color space.
+/// in RGB color space. Can both be used for
+/// quantizing an image and for efficiently
+/// querying an existing color table by taking
+/// advantage of the near-constant time lookup.
 public struct OctreeQuantization: ColorQuantization {
     private class OctreeNode: Hashable, CustomStringConvertible {
         private var red: UInt = 0
@@ -59,7 +62,7 @@ public struct OctreeQuantization: ColorQuantization {
             return Int(leftRed | leftGreen | leftBlue)
         }
 
-        func insert(color insertedColor: Color) {
+        func insert(color insertedColor: Color, colorTableIndex: Int? = nil) {
             if depth == maxDepth {
                 red = UInt(insertedColor.red)
                 green = UInt(insertedColor.green)
@@ -69,8 +72,9 @@ public struct OctreeQuantization: ColorQuantization {
                 let i = childIndex(of: insertedColor)
                 if childs[i] == nil {
                     childs[i] = OctreeNode(depth: depth + 1)
+                    childs[i]!.colorTableIndex = colorTableIndex
                 }
-                childs[i]!.insert(color: insertedColor)
+                childs[i]!.insert(color: insertedColor, colorTableIndex: colorTableIndex)
             }
         }
 
@@ -215,15 +219,13 @@ public struct OctreeQuantization: ColorQuantization {
     /// Creates an octree without performing any reductions from the
     /// given color table.
     public init(fromColors colors: [Color]) {
-        colorTable = []
+        colorTable = colors
         octree = OctreeNode(depth: 0)
 
         log.debug("Inserting colors")
-        for color in colors {
-            octree.insert(color: color)
+        for (i, color) in colors.enumerated() {
+            octree.insert(color: color, colorTableIndex: i)
         }
-
-        octree.fill(colorTable: &colorTable)
     }
 
     public func quantize(color: Color) -> Int {
