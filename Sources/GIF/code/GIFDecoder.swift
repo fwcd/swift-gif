@@ -26,6 +26,7 @@ struct GIFDecoder {
         }
 
         var applicationExtensions = [ApplicationExtension]()
+        var commentExtensions = [String]()
         var frames = [Frame]()
 
         while try peekByte() != GIFConstants.trailer {
@@ -34,9 +35,10 @@ struct GIFDecoder {
             if let applicationExtension = try readApplicationExtension() {
                 applicationExtensions.append(applicationExtension)
                 foundSomething = true
-            }
-
-            if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization, backgroundColorIndex: logicalScreenDescriptor.backgroundColorIndex) {
+            } else if let commentExtension = try readCommentExtension() {
+                commentExtensions.append(commentExtension)
+                foundSomething = true
+            } else if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization, backgroundColorIndex: logicalScreenDescriptor.backgroundColorIndex) {
                 frames.append(frame)
                 foundSomething = true
             }
@@ -52,6 +54,7 @@ struct GIFDecoder {
             logicalScreenDescriptor: logicalScreenDescriptor,
             globalQuantization: globalQuantization,
             applicationExtensions: applicationExtensions,
+            commentExtensions: commentExtensions,
             frames: frames
         )
     }
