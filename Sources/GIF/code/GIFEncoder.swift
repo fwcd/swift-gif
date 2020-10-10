@@ -22,7 +22,7 @@ struct GIFEncoder {
         append(logicalScreenDescriptor: gif.logicalScreenDescriptor)
 
         if let quantization = gif.globalQuantization {
-            append(colorTable: quantization.colorTable, colorResolution: gif.logicalScreenDescriptor.colorResolution)
+            append(colorTable: quantization.colorTable, size: gif.logicalScreenDescriptor.sizeOfGlobalColorTable)
         }
 
         for applicationExtension in gif.applicationExtensions {
@@ -32,7 +32,7 @@ struct GIFEncoder {
         // TODO: Encode comment extensions
 
         for frame in gif.frames {
-            append(frame: frame, globalQuantization: gif.globalQuantization, colorResolution: gif.logicalScreenDescriptor.colorResolution, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
+            append(frame: frame, globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
         }
 
         appendTrailer()
@@ -140,10 +140,10 @@ struct GIFEncoder {
         log.debug("Appended image descriptor")
     }
 
-    private mutating func append(colorTable: [Color], colorResolution: UInt8) {
+    private mutating func append(colorTable: [Color], size: UInt8) {
         log.debug("Appending color table...")
 
-        let maxColorBytes = colorTableSizeOf(colorResolution: colorResolution) * GIFConstants.colorChannels
+        let maxColorBytes = colorTableCountOf(size: size) * GIFConstants.colorChannels
         var i = 0
 
         for color in colorTable {
@@ -217,10 +217,11 @@ struct GIFEncoder {
     private mutating func append(
         frame: Frame,
         globalQuantization: ColorQuantization? = nil,
-        colorResolution: UInt8,
+        sizeOfGlobalColorTable: UInt8,
         backgroundColorIndex: UInt8
     ) {
         let image = frame.image
+        let sizeOfColorTable = frame.imageDescriptor.useLocalColorTable ? frame.imageDescriptor.sizeOfLocalColorTable : sizeOfGlobalColorTable
         var actualBackgroundColorIndex = backgroundColorIndex
 
         if let graphicsControlExtension = frame.graphicsControlExtension {
@@ -234,7 +235,7 @@ struct GIFEncoder {
         append(imageDescriptor: frame.imageDescriptor)
 
         if let quantization = frame.localQuantization {
-            append(colorTable: quantization.colorTable, colorResolution: colorResolution)
+            append(colorTable: quantization.colorTable, size: sizeOfColorTable)
         }
 
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }

@@ -10,6 +10,6 @@ public enum GIFDecodingError: Error {
     case invalidLoopingExtension(String)
     case invalidGraphicsControlExtension
     case unrecognizedBlock(String)
-    case missingImageDescriptor
+    case missingImageDescriptor(String)
     case noQuantizationForDecodingImage
 }

@@ -20,7 +20,7 @@ struct GIFDecoder {
         var globalQuantization: ColorQuantization? = nil
 
         if logicalScreenDescriptor.useGlobalColorTable {
-            globalQuantization = try readColorTable(colorResolution: logicalScreenDescriptor.colorResolution)
+            globalQuantization = try readColorTable(size: logicalScreenDescriptor.sizeOfGlobalColorTable)
         } else {
             log.trace("No global color table!")
         }
@@ -38,7 +38,7 @@ struct GIFDecoder {
             } else if let commentExtension = try readCommentExtension() {
                 commentExtensions.append(commentExtension)
                 foundSomething = true
-            } else if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization, backgroundColorIndex: logicalScreenDescriptor.backgroundColorIndex) {
+            } else if let frame = try readFrame(sizeOfGlobalColorTable: logicalScreenDescriptor.sizeOfGlobalColorTable, globalQuantization: globalQuantization, backgroundColorIndex: logicalScreenDescriptor.backgroundColorIndex) {
                 frames.append(frame)
                 foundSomething = true
             }
@@ -165,7 +165,7 @@ struct GIFDecoder {
         let backgroundColorIndex = try readByte()
         let pixelAspectRatio = try readByte()
 
-        log.debug("Read logical screen descriptor (width: \(width), height: \(height), global color table: \(useGlobalColorTable), color resolution: \(String(colorResolution, radix: 2)), bg color index: \(backgroundColorIndex))")
+        log.debug("Read logical screen descriptor (width: \(width), height: \(height), global color table: \(useGlobalColorTable), color resolution: \(String(colorResolution, radix: 2)), size of global color table: \(String(sizeOfGlobalColorTable, radix: 2)), bg color index: \(backgroundColorIndex))")
 
         return LogicalScreenDescriptor(
             width: width,
@@ -179,12 +179,12 @@ struct GIFDecoder {
         )
     }
 
-    private mutating func readColorTable(colorResolution: UInt8) throws -> ColorQuantization {
+    private mutating func readColorTable(size: UInt8) throws -> ColorQuantization {
         log.trace("Reading color table...")
 
         var colorTable = [Color]()
 
-        for _ in 0..<colorTableSizeOf(colorResolution: colorResolution) {
+        for _ in 0..<colorTableCountOf(size: size) {
             try colorTable.append(readColor())
         }
 
@@ -259,7 +259,7 @@ struct GIFDecoder {
         quantization: ColorQuantization,
         width: Int,
         height: Int,
-        colorResolution: UInt8,
+        sizeOfColorTable: UInt8,
         backgroundColorIndex: UInt8
     ) throws -> Image {
         log.debug("Reading image data...")
@@ -272,7 +272,7 @@ struct GIFDecoder {
 
         // Perform actual decoding
         var lzwEncoded = BitData(from: [UInt8](lzwData))
-        var decoder = LzwDecoder(colorCount: colorTableSizeOf(colorResolution: colorResolution), minCodeSize: Int(minCodeSize))
+        var decoder = LzwDecoder(colorCount: colorTableCountOf(size: sizeOfColorTable), minCodeSize: Int(minCodeSize))
         var decoded = [Int]() // holds the color indices
 
         log.debug("LZW-decoding the image data (min code size: \(minCodeSize))...")
@@ -301,7 +301,7 @@ struct GIFDecoder {
     }
 
     private mutating func readFrame(
-        colorResolution: UInt8,
+        sizeOfGlobalColorTable: UInt8,
         globalQuantization: ColorQuantization?,
         backgroundColorIndex: UInt8
     ) throws -> Frame? {
@@ -310,23 +310,24 @@ struct GIFDecoder {
             if graphicsControlExtension == nil {
                 return nil
             } else {
-                throw GIFDecodingError.missingImageDescriptor
+                throw GIFDecodingError.missingImageDescriptor("at: \(data.prefix(4).hexString)...")
             }
         }
 
         log.trace("Reading frame...")
 
         let actualBackgroundColorIndex = (graphicsControlExtension?.backgroundColorIndex).filter { _ in imageDescriptor.useLocalColorTable } ?? backgroundColorIndex
+        let sizeOfColorTable = imageDescriptor.useLocalColorTable ? imageDescriptor.sizeOfLocalColorTable : sizeOfGlobalColorTable
         var localQuantization: ColorQuantization?
 
         if imageDescriptor.useLocalColorTable {
-            localQuantization = try readColorTable(colorResolution: colorResolution)
+            localQuantization = try readColorTable(size: sizeOfColorTable)
         } else {
             log.trace("No local color table!")
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
-        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution, backgroundColorIndex: actualBackgroundColorIndex)
+        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), sizeOfColorTable: sizeOfColorTable, backgroundColorIndex: actualBackgroundColorIndex)
 
         log.debug("Read frame")
 
