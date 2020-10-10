@@ -38,6 +38,7 @@ let package = Package(
             name: "GIFInspector",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Logging", package: "swift-log"),
                 .target(name: "GIF")
             ]
         ),

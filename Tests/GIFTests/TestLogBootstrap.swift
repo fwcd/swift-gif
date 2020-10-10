@@ -1,4 +1,5 @@
 import Logging
+import GIF
 
 // See https://github.com/apple/swift-log/issues/77
 //
@@ -7,7 +8,7 @@ import Logging
 
 let isLoggingConfigured: Bool = {
     LoggingSystem.bootstrap {
-        TestLogHandler(label: $0)
+        GIFLogHandler(label: $0)
     }
     return true
 }()

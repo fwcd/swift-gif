@@ -1,6 +1,11 @@
 import ArgumentParser
 import Foundation
+import Logging
 import GIF
+
+LoggingSystem.bootstrap {
+    GIFLogHandler(label: $0)
+}
 
 struct GIFInspector: ParsableCommand {
     @Argument(help: "The file path the input GIF")
