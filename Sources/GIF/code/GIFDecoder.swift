@@ -259,11 +259,10 @@ struct GIFDecoder {
         colorResolution: UInt8,
         backgroundColorIndex: UInt8
     ) throws -> Image {
-        log.trace("Reading image data...")
+        log.debug("Reading image data...")
 
         // Read beginning of image block
         let minCodeSize = try readByte()
-        log.trace("Min code size: \(minCodeSize)")
 
         // Read data sub-blocks
         let lzwData = try readSubBlocks()
@@ -273,6 +272,7 @@ struct GIFDecoder {
         var decoder = LzwDecoder(colorCount: colorTableSizeOf(colorResolution: colorResolution), minCodeSize: Int(minCodeSize))
         var decoded = [Int]() // holds the color indices
 
+        log.debug("LZW-decoding the image data (min code size: \(minCodeSize))...")
         try decoder.beginDecoding(from: &lzwEncoded)
         while try decoder.decodeAndAppend(from: &lzwEncoded, into: &decoded) {}
 

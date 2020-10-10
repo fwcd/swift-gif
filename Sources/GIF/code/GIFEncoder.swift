@@ -181,7 +181,7 @@ struct GIFEncoder {
         var encoder = LzwEncoder(colorCount: GIFConstants.colorCount)
         var lzwEncoded = BitData()
 
-        log.debug("LZW-encoding the frame...")
+        log.debug("LZW-encoding the image data...")
         encoder.beginEncoding(into: &lzwEncoded)
 
         // Iterate all pixels as ARGB values and encode them
@@ -193,7 +193,7 @@ struct GIFEncoder {
 
         encoder.finishEncoding(into: &lzwEncoded)
 
-        log.debug("Appending the encoded frame, minCodeSize: \(encoder.minCodeSize)...")
+        log.debug("Appending the encoded image data (min code size: \(encoder.minCodeSize))...")
         append(byte: UInt8(encoder.minCodeSize))
 
         let lzwData = lzwEncoded.bytes
