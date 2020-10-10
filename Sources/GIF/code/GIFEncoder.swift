@@ -104,7 +104,7 @@ struct GIFEncoder {
     }
 
     private mutating func append(graphicsControlExtension: GraphicsControlExtension) {
-        append(byte: GIFConstants.applicationExtension)
+        append(byte: GIFConstants.extensionIntroducer)
         append(byte: GIFConstants.graphicsControlExtension)
         append(byte: 0x04) // Block size in bytes
 
