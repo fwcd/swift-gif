@@ -306,6 +306,10 @@ struct GIFDecoder {
         backgroundColorIndex: UInt8
     ) throws -> Frame? {
         let graphicsControlExtension = try readGraphicsControlExtension()
+
+        // Slightly hacky, skip comment extensions between GCE and image descriptor
+        while try readCommentExtension() != nil {}
+
         guard let imageDescriptor = try readImageDescriptor() else {
             if graphicsControlExtension == nil {
                 return nil
