@@ -6,7 +6,7 @@ public struct Frame {
     public let graphicsControlExtension: GraphicsControlExtension?
     public internal(set) var localQuantization: ColorQuantization?
 
-    public var delayTime: Int? { graphicsControlExtension.map { Int($0.delayTime) } }
+    public var delayTime: Int { graphicsControlExtension.map { Int($0.delayTime) } ?? 0 }
     public var disposalMethod: DisposalMethod? { graphicsControlExtension?.disposalMethod }
 
     /// High-level initializer
