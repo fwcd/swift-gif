@@ -37,7 +37,7 @@ struct GIFEncoder {
 
         appendTrailer()
 
-        log.info("Appended GIF")
+        log.debug("Appended GIF")
     }
 
     private mutating func append(byte: UInt8) {
@@ -67,7 +67,7 @@ struct GIFEncoder {
     private mutating func appendHeader() {
         append(string: "GIF89a")
 
-        log.info("Appended header")
+        log.debug("Appended header")
     }
 
     private mutating func append(logicalScreenDescriptor: LogicalScreenDescriptor) {
@@ -84,7 +84,7 @@ struct GIFEncoder {
         append(byte: logicalScreenDescriptor.backgroundColorIndex)
         append(byte: logicalScreenDescriptor.pixelAspectRatio)
 
-        log.info("Appended logical screen descriptor")
+        log.debug("Appended logical screen descriptor")
     }
 
     private mutating func append(applicationExtension: ApplicationExtension) {
@@ -100,7 +100,7 @@ struct GIFEncoder {
                 append(byte: 0x00) // Block terminator
         }
 
-        log.info("Appended application extension")
+        log.debug("Appended application extension")
     }
 
     private mutating func append(graphicsControlExtension: GraphicsControlExtension) {
@@ -119,7 +119,7 @@ struct GIFEncoder {
         append(byte: graphicsControlExtension.backgroundColorIndex) // Transparent color index
         append(byte: 0x00) // Block terminator
 
-        log.info("Appended graphics control extension")
+        log.debug("Appended graphics control extension")
     }
 
     private mutating func append(imageDescriptor: ImageDescriptor) {
@@ -137,7 +137,7 @@ struct GIFEncoder {
         packedField.append(imageDescriptor.sizeOfLocalColorTable, bits: 3)
         append(packedField: packedField)
 
-        log.info("Appended image descriptor")
+        log.debug("Appended image descriptor")
     }
 
     private mutating func append(colorTable: [Color], colorResolution: UInt8) {
@@ -156,7 +156,7 @@ struct GIFEncoder {
             i += 1
         }
 
-        log.info("Appended color table")
+        log.debug("Appended color table")
     }
 
     private func quantize(color: Color, with quantization: ColorQuantization, backgroundColorIndex: Int) -> Int {
@@ -168,14 +168,14 @@ struct GIFEncoder {
     }
 
     private mutating func appendImageDataAsLZW(image: Image, quantization: ColorQuantization, width: Int, height: Int) {
-        log.info("Appending image data...")
+        log.debug("Appending image data...")
 
         // Convert the ARGB-encoded image first to color
         // indices and then to LZW-compressed codes
         var encoder = LzwEncoder(colorCount: GIFConstants.colorCount)
         var lzwEncoded = BitData()
 
-        log.info("LZW-encoding the frame...")
+        log.debug("LZW-encoding the frame...")
         encoder.beginEncoding(into: &lzwEncoded)
 
         // Iterate all pixels as ARGB values and encode them
@@ -187,7 +187,7 @@ struct GIFEncoder {
 
         encoder.finishEncoding(into: &lzwEncoded)
 
-        log.info("Appending the encoded frame, minCodeSize: \(encoder.minCodeSize)...")
+        log.debug("Appending the encoded frame, minCodeSize: \(encoder.minCodeSize)...")
         append(byte: UInt8(encoder.minCodeSize))
 
         let lzwData = lzwEncoded.bytes
@@ -203,7 +203,7 @@ struct GIFEncoder {
 
         append(byte: 0x00) // Block terminator
 
-        log.info("Appended image data")
+        log.debug("Appended image data")
     }
 
     /// Appends a frame with the specified quantizer
@@ -224,12 +224,12 @@ struct GIFEncoder {
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
         appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height)
 
-        log.info("Appended frame")
+        log.debug("Appended frame")
     }
 
     private mutating func appendTrailer() {
         append(byte: GIFConstants.trailer)
 
-        log.info("Appended trailer")
+        log.debug("Appended trailer")
     }
 }

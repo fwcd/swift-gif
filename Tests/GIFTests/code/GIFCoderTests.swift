@@ -10,6 +10,10 @@ final class GIFCoderTests: XCTestCase {
         ("testGIFCoder", testGIFCoder)
     ]
 
+    override func setUp() {
+        XCTAssert(isLoggingConfigured)
+    }
+
     func testGIFCoder() throws {
         for resource in ["mini", "mandelbrot"] {
             log.info("Testing GIF en-/decoder with \(resource).gif...")
