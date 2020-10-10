@@ -36,7 +36,7 @@ struct GIFDecoder {
                 foundSomething = true
             }
 
-            if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization) {
+            if let frame = try readFrame(colorResolution: logicalScreenDescriptor.colorResolution, globalQuantization: globalQuantization, backgroundColorIndex: logicalScreenDescriptor.backgroundColorIndex) {
                 frames.append(frame)
                 foundSomething = true
             }
@@ -252,11 +252,18 @@ struct GIFDecoder {
         )
     }
 
-    private mutating func readImageDataAsLZW(quantization: ColorQuantization, width: Int, height: Int, colorResolution: UInt8) throws -> Image {
+    private mutating func readImageDataAsLZW(
+        quantization: ColorQuantization,
+        width: Int,
+        height: Int,
+        colorResolution: UInt8,
+        backgroundColorIndex: UInt8
+    ) throws -> Image {
         log.trace("Reading image data...")
 
         // Read beginning of image block
         let minCodeSize = try readByte()
+        print("Min code size: \(minCodeSize)")
 
         // Read data sub-blocks
         let lzwData = try readSubBlocks()
@@ -273,9 +280,15 @@ struct GIFDecoder {
         let colorTable = quantization.colorTable
         var image = try Image(width: width, height: height)
 
+        assert(decoded.count >= width * height)
+        log.debug("Decoded image data \(decoded.prefix(10).map(UInt8.init).hexString)...")
+
         for y in 0..<height {
             for x in 0..<width {
-                image[y, x] = colorTable[decoded[(y * width) + x]]
+                let colorIndex = decoded[(y * width) + x]
+                let isTransparent = colorIndex == backgroundColorIndex
+                assert(isTransparent || colorIndex < colorTable.count, "Color index #\(colorIndex) is too large for color table of size \(colorTable.count) (note: background color index is #\(backgroundColorIndex))")
+                image[y, x] = isTransparent ? Colors.transparent : colorTable[colorIndex]
             }
         }
 
@@ -284,7 +297,11 @@ struct GIFDecoder {
         return image
     }
 
-    private mutating func readFrame(colorResolution: UInt8, globalQuantization: ColorQuantization?) throws -> Frame? {
+    private mutating func readFrame(
+        colorResolution: UInt8,
+        globalQuantization: ColorQuantization?,
+        backgroundColorIndex: UInt8
+    ) throws -> Frame? {
         let graphicsControlExtension = try readGraphicsControlExtension()
         guard let imageDescriptor = try readImageDescriptor() else {
             if graphicsControlExtension == nil {
@@ -305,7 +322,7 @@ struct GIFDecoder {
         }
 
         guard let quantization = localQuantization ?? globalQuantization else { throw GIFDecodingError.noQuantizationForDecodingImage }
-        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution)
+        let image = try readImageDataAsLZW(quantization: quantization, width: Int(imageDescriptor.imageWidth), height: Int(imageDescriptor.imageHeight), colorResolution: colorResolution, backgroundColorIndex: backgroundColorIndex)
 
         log.debug("Read frame")
 

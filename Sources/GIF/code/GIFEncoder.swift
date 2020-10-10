@@ -32,7 +32,7 @@ struct GIFEncoder {
         // TODO: Encode comment extensions
 
         for frame in gif.frames {
-            append(frame: frame, globalQuantization: gif.globalQuantization, colorResolution: gif.logicalScreenDescriptor.colorResolution)
+            append(frame: frame, globalQuantization: gif.globalQuantization, colorResolution: gif.logicalScreenDescriptor.colorResolution, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
         }
 
         appendTrailer()
@@ -159,15 +159,21 @@ struct GIFEncoder {
         log.debug("Appended color table")
     }
 
-    private func quantize(color: Color, with quantization: ColorQuantization, backgroundColorIndex: Int) -> Int {
+    private func quantize(color: Color, with quantization: ColorQuantization, backgroundColorIndex: UInt8) -> Int {
         if color.alpha < 128 {
-            return backgroundColorIndex // Use transparent color
+            return Int(backgroundColorIndex) // Use transparent color
         } else {
             return quantization.quantize(color: color)
         }
     }
 
-    private mutating func appendImageDataAsLZW(image: Image, quantization: ColorQuantization, width: Int, height: Int) {
+    private mutating func appendImageDataAsLZW(
+        image: Image,
+        quantization: ColorQuantization,
+        width: Int,
+        height: Int,
+        backgroundColorIndex: UInt8
+    ) {
         log.debug("Appending image data...")
 
         // Convert the ARGB-encoded image first to color
@@ -181,7 +187,7 @@ struct GIFEncoder {
         // Iterate all pixels as ARGB values and encode them
         for y in 0..<height {
             for x in 0..<width {
-                encoder.encodeAndAppend(index: quantize(color: image[y, x], with: quantization, backgroundColorIndex: Int(GIFConstants.backgroundColorIndex)), into: &lzwEncoded)
+                encoder.encodeAndAppend(index: quantize(color: image[y, x], with: quantization, backgroundColorIndex: backgroundColorIndex), into: &lzwEncoded)
             }
         }
 
@@ -208,7 +214,12 @@ struct GIFEncoder {
 
     /// Appends a frame with the specified quantizer
     /// and delay time (in hundrets of a second).
-    private mutating func append(frame: Frame, globalQuantization: ColorQuantization? = nil, colorResolution: UInt8) {
+    private mutating func append(
+        frame: Frame,
+        globalQuantization: ColorQuantization? = nil,
+        colorResolution: UInt8,
+        backgroundColorIndex: UInt8
+    ) {
         let image = frame.image
 
         if let graphicsControlExtension = frame.graphicsControlExtension {
@@ -222,7 +233,7 @@ struct GIFEncoder {
         }
 
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
-        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height)
+        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: backgroundColorIndex)
 
         log.debug("Appended frame")
     }
