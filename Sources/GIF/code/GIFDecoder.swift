@@ -263,7 +263,7 @@ struct GIFDecoder {
 
         // Read beginning of image block
         let minCodeSize = try readByte()
-        print("Min code size: \(minCodeSize)")
+        log.trace("Min code size: \(minCodeSize)")
 
         // Read data sub-blocks
         let lzwData = try readSubBlocks()
