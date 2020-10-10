@@ -3,7 +3,7 @@ import Utils
 import Logging
 
 fileprivate let log = Logger(label: "GIF.LzwEncoder")
-fileprivate let maxCodeTableCount: Int = 1 << 12
+fileprivate let maxCodeTableCount: Int = (1 << 12) - 1
 
 struct LzwEncoder {
     private(set) var table: LzwEncoderTable
