@@ -12,14 +12,13 @@ public struct Frame {
     /// High-level initializer
     public init(
         image: Image,
-        imageDescriptor: ImageDescriptor? = nil,
         delayTime: Int = 0,
         localQuantization: ColorQuantization? = nil,
         disposalMethod: DisposalMethod = .clearCanvas
     ) {
         self.init(
             image: image,
-            imageDescriptor: imageDescriptor ?? ImageDescriptor(
+            imageDescriptor: ImageDescriptor(
                 imageLeft: 0,
                 imageTop: 0,
                 imageWidth: UInt16(image.width),
