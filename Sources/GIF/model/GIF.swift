@@ -9,8 +9,19 @@ public struct GIF {
     public var commentExtensions: [String]
     public var frames: [Frame] {
         didSet {
-            for i in 0..<frames.count {
-                frames[i].localQuantization = frames[i].localQuantization ?? OctreeQuantization(fromImage: frames[i].image, colorCount: GIFConstants.colorCount)
+            if !logicalScreenDescriptor.useGlobalColorTable {
+                assert(globalQuantization == nil)
+
+                for frame in frames {
+                    // If neither a local nor a global color table exists for any frame,
+                    // generate the global color table to make that there is always one
+                    // available.
+                    if !frame.imageDescriptor.useLocalColorTable {
+                        logicalScreenDescriptor.useGlobalColorTable = true
+                        globalQuantization = OctreeQuantization(fromImage: frame.image)
+                        break
+                    }
+                }
             }
         }
     }
@@ -37,12 +48,12 @@ public struct GIF {
     }
 
     // High-level initializers
-    public init(width: Int, height: Int, loopCount: Int? = 0, useGlobalColorTable: Bool = true, globalQuantization: ColorQuantization? = nil) {
+    public init(width: Int, height: Int, loopCount: Int? = 0, globalQuantization: ColorQuantization? = nil) {
         self.init(
             logicalScreenDescriptor: LogicalScreenDescriptor(
                 width: UInt16(width),
                 height: UInt16(height),
-                useGlobalColorTable: useGlobalColorTable,
+                useGlobalColorTable: globalQuantization != nil,
                 colorResolution: GIFConstants.colorResolution,
                 sortFlag: false,
                 sizeOfGlobalColorTable: GIFConstants.colorResolution,

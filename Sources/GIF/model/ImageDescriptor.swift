@@ -1,10 +1,10 @@
 public struct ImageDescriptor {
-    public let imageLeft: UInt16
-    public let imageTop: UInt16
-    public let imageWidth: UInt16
-    public let imageHeight: UInt16
-    public let useLocalColorTable: Bool
-    public let interlaceFlag: Bool
-    public let sortFlag: Bool
-    public let sizeOfLocalColorTable: UInt8
+    public internal(set) var imageLeft: UInt16
+    public internal(set) var imageTop: UInt16
+    public internal(set) var imageWidth: UInt16
+    public internal(set) var imageHeight: UInt16
+    public internal(set) var useLocalColorTable: Bool
+    public internal(set) var interlaceFlag: Bool
+    public internal(set) var sortFlag: Bool
+    public internal(set) var sizeOfLocalColorTable: UInt8
 }
