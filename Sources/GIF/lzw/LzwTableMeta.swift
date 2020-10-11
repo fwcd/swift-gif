@@ -11,6 +11,7 @@ struct LzwTableMeta {
     public init(colorCount: Int, minCodeSize: Int? = nil) {
         self.colorCount = colorCount
 
+        let explicitlySpecified = minCodeSize != nil
         let minCodeSize = minCodeSize ?? {
             // Find the smallest power of two that is
             // greater than or equal to the color count
@@ -22,7 +23,7 @@ struct LzwTableMeta {
             return size
         }()
         self.minCodeSize = minCodeSize
-        assert((1 << minCodeSize) >= colorCount)
+        assert((1 << minCodeSize) >= colorCount, "Min code size is \(minCodeSize), but 1 << \(minCodeSize) is not >= \(colorCount) (explicitly specified min code size: \(explicitlySpecified))")
         minCount = (1 << minCodeSize) + 2
 
         clearCode = 1 << minCodeSize
