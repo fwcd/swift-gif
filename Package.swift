@@ -42,6 +42,16 @@ let package = Package(
                 .target(name: "GIF")
             ]
         ),
+        .target(
+            name: "GIFDemoGenerator",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "Utils", package: "swift-utils"),
+                .product(name: "Graphics", package: "swift-graphics"),
+                .target(name: "GIF")
+            ]
+        ),
         .testTarget(
             name: "GIFTests",
             dependencies: [
