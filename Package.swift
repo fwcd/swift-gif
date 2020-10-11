@@ -19,8 +19,8 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.0"),
-        .package(url: "https://github.com/fwcd/swift-utils.git", .revision("b68ef50b209562195ad33693564baaeb7574d809")),
-        .package(url: "https://github.com/fwcd/swift-graphics.git", .revision("b889c8af7f791abd1a303f001842077093401697")),
+        .package(url: "https://github.com/fwcd/swift-utils.git", from: "1.1.0"),
+        .package(url: "https://github.com/fwcd/swift-graphics.git", .revision("206b619632fe7a2b6503ebf562c49949d2b2749f")),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1"))
     ],
     targets: [
