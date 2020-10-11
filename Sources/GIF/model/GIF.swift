@@ -57,7 +57,7 @@ public struct GIF {
                 colorResolution: GIFConstants.colorResolution,
                 sortFlag: false,
                 sizeOfGlobalColorTable: GIFConstants.colorResolution,
-                backgroundColorIndex: 0,
+                backgroundColorIndex: GIFConstants.backgroundColorIndex,
                 pixelAspectRatio: 0
             ),
             globalQuantization: globalQuantization,
