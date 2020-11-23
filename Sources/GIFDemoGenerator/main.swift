@@ -21,7 +21,7 @@ struct GIFDemoGenerator: ParsableCommand {
 
         for i in 0..<5 {
             let image = try Image(width: width, height: height)
-            var graphics = CairoGraphics(fromImage: image)
+            let graphics = CairoGraphics(fromImage: image)
 
             graphics.draw(Rectangle(fromX: Double(i) * 20, y: Double(i) * 20, width: 10, height: 10, color: Colors.blue, isFilled: true))
 

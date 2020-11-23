@@ -281,7 +281,7 @@ struct GIFDecoder {
 
         // Decode the color indices to actual (A)RGB colors and write them into an image
         let colorTable = quantization.colorTable
-        var image = try Image(width: width, height: height)
+        let image = try Image(width: width, height: height)
 
         assert(decoded.count >= width * height)
         log.debug("Decoded image data \(decoded.prefix(10).map(UInt8.init).hexString)...")
