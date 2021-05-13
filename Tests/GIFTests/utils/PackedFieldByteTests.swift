@@ -2,10 +2,6 @@ import XCTest
 @testable import GIF
 
 final class PackedFieldByteTests: XCTestCase {
-    static var allTests = [
-        ("testPackedFields", testPackedFields)
-    ]
-
     func testPackedFields() throws {
         var packed = PackedFieldByte()
 

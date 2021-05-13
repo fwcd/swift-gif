@@ -6,10 +6,6 @@ import Graphics
 fileprivate let log = Logger(label: "GIFTests.GIFCoderTests")
 
 final class GIFCoderTests: XCTestCase {
-    static var allTests = [
-        ("testGIFCoder", testGIFCoder)
-    ]
-
     override func setUp() {
         XCTAssert(isLoggingConfigured)
     }

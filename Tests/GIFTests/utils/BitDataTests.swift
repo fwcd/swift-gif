@@ -2,10 +2,6 @@ import XCTest
 @testable import GIF
 
 final class BitDataTests: XCTestCase {
-    static var allTests = [
-        ("testBitData", testBitData)
-    ]
-
     func testBitData() throws {
         var sink1 = BitData()
         XCTAssertEqual(sink1.bytes, [0])
