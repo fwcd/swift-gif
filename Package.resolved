@@ -20,12 +20,12 @@
         }
       },
       {
-        "package": "Cairo",
+        "package": "swift-cairo",
         "repositoryURL": "https://github.com/fwcd/swift-cairo.git",
         "state": {
           "branch": null,
-          "revision": "6aaae4301a6ee611bb3977547bbef62d3e4c9ac8",
-          "version": null
+          "revision": "e3f1e695f1630022ee65241744a81bc1e056d0bb",
+          "version": "1.3.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/fwcd/swift-graphics.git",
         "state": {
           "branch": null,
-          "revision": "c7183ea8ca9de2d07750a209b23eba40ea91c375",
-          "version": null
+          "revision": "06760653516ce19753d1a2f61879a2915987e51a",
+          "version": "1.1.0"
         }
       },
       {
