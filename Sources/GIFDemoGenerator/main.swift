@@ -23,7 +23,7 @@ struct GIFDemoGenerator: ParsableCommand {
             let image = try Image(width: width, height: height)
             let graphics = CairoGraphics(fromImage: image)
 
-            graphics.draw(Rectangle(fromX: Double(i) * 20, y: Double(i) * 20, width: 10, height: 10, color: Colors.blue, isFilled: true))
+            graphics.draw(Rectangle(fromX: Double(i) * 20, y: Double(i) * 20, width: 10, height: 10, color: .blue, isFilled: true))
 
             gif.frames.append(.init(image: image, delayTime: 100))
         }

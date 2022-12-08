@@ -291,7 +291,7 @@ struct GIFDecoder {
                 let colorIndex = decoded[(y * width) + x]
                 let isTransparent = colorIndex == backgroundColorIndex
                 assert(isTransparent || colorIndex < colorTable.count, "Color index #\(colorIndex) is too large for color table of size \(colorTable.count) (note: background color index is #\(backgroundColorIndex))")
-                image[y, x] = isTransparent ? Colors.transparent : colorTable[colorIndex]
+                image[y, x] = isTransparent ? .transparent : colorTable[colorIndex]
             }
         }
 
