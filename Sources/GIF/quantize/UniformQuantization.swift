@@ -1,5 +1,5 @@
 import Foundation
-import Graphics
+import CairoGraphics
 
 /// Color channels, assuming RGB colors.
 fileprivate let CHANNELS = 3
@@ -11,7 +11,7 @@ public struct UniformQuantization: ColorQuantization {
     private let colorsPerChannel: Int
     private let colorStride: Int
 
-    public init(fromImage image: Image, colorCount: Int = GIFConstants.nonTransparentColorCount) {
+    public init(fromImage image: CairoImage, colorCount: Int = GIFConstants.nonTransparentColorCount) {
         colorTable = []
         colorsPerChannel = Int(pow(Double(colorCount), 1.0 / Double(CHANNELS)))
         colorStride = 256 / colorsPerChannel

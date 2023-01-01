@@ -1,4 +1,4 @@
-import Graphics
+import CairoGraphics
 
 /// A finite color palette generated from an image.
 public protocol ColorQuantization {
@@ -9,7 +9,7 @@ public protocol ColorQuantization {
 
     /// Applies the associated quantization algorithm
     /// to create a quantized version of the given image.
-    init(fromImage image: Image, colorCount: Int)
+    init(fromImage image: CairoImage, colorCount: Int)
 
     /// Quantizes a given color, returning a code in
     /// the color table.

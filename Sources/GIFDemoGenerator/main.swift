@@ -2,7 +2,7 @@ import ArgumentParser
 import Foundation
 import Logging
 import GIF
-import Graphics
+import CairoGraphics
 import Utils
 
 LoggingSystem.bootstrap {
@@ -20,11 +20,11 @@ struct GIFDemoGenerator: ParsableCommand {
         var gif = GIF(width: width, height: height)
 
         for i in 0..<5 {
-            let image = try Image(width: width, height: height)
-            let graphics = CairoGraphics(fromImage: image)
+            let graphics = try CairoContext(width: width, height: height)
 
-            graphics.draw(Rectangle(fromX: Double(i) * 20, y: Double(i) * 20, width: 10, height: 10, color: .blue, isFilled: true))
+            graphics.draw(rect: Rectangle(fromX: Double(i) * 20, y: Double(i) * 20, width: 10, height: 10, color: .blue, isFilled: true))
 
+            let image = try graphics.makeImage()
             gif.frames.append(.init(image: image, delayTime: 100))
         }
 

@@ -1,6 +1,6 @@
 import Foundation
 import Logging
-import Graphics
+import CairoGraphics
 import Utils
 
 fileprivate let log = Logger(label: "GIF.GIFEncoder")
@@ -168,7 +168,7 @@ struct GIFEncoder {
     }
 
     private mutating func appendImageDataAsLZW(
-        image: Image,
+        image: CairoImage,
         quantization: ColorQuantization,
         width: Int,
         height: Int,

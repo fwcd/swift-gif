@@ -20,7 +20,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.0"),
         .package(url: "https://github.com/fwcd/swift-utils.git", from: "1.1.0"),
-        .package(url: "https://github.com/fwcd/swift-graphics.git", from: "1.2.0"),
+        .package(url: "https://github.com/fwcd/swift-graphics.git", from: "2.0.1"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1"))
     ],
     targets: [
@@ -31,7 +31,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Utils", package: "swift-utils"),
-                .product(name: "Graphics", package: "swift-graphics")
+                .product(name: "CairoGraphics", package: "swift-graphics")
             ]
         ),
         .target(
@@ -48,7 +48,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Utils", package: "swift-utils"),
-                .product(name: "Graphics", package: "swift-graphics"),
+                .product(name: "CairoGraphics", package: "swift-graphics"),
                 .target(name: "GIF")
             ]
         ),

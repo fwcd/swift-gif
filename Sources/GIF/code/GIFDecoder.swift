@@ -1,6 +1,6 @@
 import Foundation
 import Logging
-import Graphics
+import CairoGraphics
 import Utils
 
 fileprivate let log = Logger(label: "GIF.GIFDecoder")
@@ -261,7 +261,7 @@ struct GIFDecoder {
         height: Int,
         sizeOfColorTable: UInt8,
         backgroundColorIndex: UInt8
-    ) throws -> Image {
+    ) throws -> CairoImage {
         log.debug("Reading image data...")
 
         // Read beginning of image block
@@ -281,7 +281,7 @@ struct GIFDecoder {
 
         // Decode the color indices to actual (A)RGB colors and write them into an image
         let colorTable = quantization.colorTable
-        let image = try Image(width: width, height: height)
+        let image = try CairoImage(width: width, height: height)
 
         assert(decoded.count >= width * height)
         log.debug("Decoded image data \(decoded.prefix(10).map(UInt8.init).hexString)...")

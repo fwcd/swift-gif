@@ -1,6 +1,6 @@
 import XCTest
 import Logging
-import Graphics
+import CairoGraphics
 @testable import GIF
 
 fileprivate let log = Logger(label: "GIFTests.GIFCoderTests")
@@ -27,7 +27,7 @@ final class GIFCoderTests: XCTestCase {
         }
     }
 
-    private func assertImagesEqual(_ image1: Image, _ image2: Image) {
+    private func assertImagesEqual(_ image1: CairoImage, _ image2: CairoImage) {
         XCTAssertEqual(image1.width, image2.width)
         XCTAssertEqual(image1.height, image2.height)
 

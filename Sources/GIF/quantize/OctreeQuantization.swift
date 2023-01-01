@@ -1,7 +1,7 @@
 // Based on https://www.cubic.org/docs/octree.htm
 
 import Utils
-import Graphics
+import CairoGraphics
 import Logging
 
 fileprivate let log = Logger(label: "GIF.OctreeQuantization")
@@ -158,7 +158,7 @@ public struct OctreeQuantization: ColorQuantization {
 
     /// Creates an octree, inserts the image's colors and reduces
     /// the tree until only `colorCount` colors are left.
-    public init(fromImage image: Image, colorCount: Int = GIFConstants.nonTransparentColorCount) {
+    public init(fromImage image: CairoImage, colorCount: Int = GIFConstants.nonTransparentColorCount) {
         colorTable = []
         octree = OctreeNode(depth: 0)
 
