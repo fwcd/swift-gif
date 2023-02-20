@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "Socket",
-        "repositoryURL": "https://github.com/Kitura/BlueSocket.git",
-        "state": {
-          "branch": null,
-          "revision": "c46a3d41f5b2401d18bcb46d0101cdc5cd13e307",
-          "version": "1.0.52"
-        }
-      },
-      {
         "package": "swift-argument-parser",
         "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
         "state": {
@@ -33,8 +24,8 @@
         "repositoryURL": "https://github.com/fwcd/swift-graphics.git",
         "state": {
           "branch": null,
-          "revision": "b358a302eb2abe446f94c53546fde6674733d661",
-          "version": "2.0.1"
+          "revision": "d57c3f5b4deb36009301ae3628bb2400f466c8e4",
+          "version": "2.1.0"
         }
       },
       {
@@ -51,8 +42,8 @@
         "repositoryURL": "https://github.com/fwcd/swift-utils.git",
         "state": {
           "branch": null,
-          "revision": "768d7ab4327cef706e8e2727734c1520c7b39e18",
-          "version": "1.1.0"
+          "revision": "7101c523c5986cecc3c667662aba66805ea6e7ce",
+          "version": "2.0.0"
         }
       },
       {
@@ -62,6 +53,15 @@
           "branch": null,
           "revision": "774dc9c7213085db8aa59595e27c1cd22e428904",
           "version": "2.3.2"
+        }
+      },
+      {
+        "package": "XMLCoder",
+        "repositoryURL": "https://github.com/MaxDesiatov/XMLCoder.git",
+        "state": {
+          "branch": null,
+          "revision": "c438dad94f6a243b411b70a4b4bac54595064808",
+          "version": "0.15.0"
         }
       }
     ]
