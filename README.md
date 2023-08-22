@@ -1,3 +1,7 @@
+# Multicore GIF Encoder
+
+Faster version of the original GIF encoder for usage in production renders.
+
 # GIF Coder for Swift
 
 [![Build](https://github.com/fwcd/swift-gif/actions/workflows/build.yml/badge.svg)](https://github.com/fwcd/swift-gif/actions/workflows/build.yml)
