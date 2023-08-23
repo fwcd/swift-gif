@@ -3,6 +3,7 @@ import Logging
 import CairoGraphics
 import Utils
 import QuartzCore
+import System
 
 fileprivate let log = Logger(label: "GIF.GIFEncoder")
 
@@ -31,10 +32,54 @@ struct GIFEncoder {
         }
 
         // TODO: Encode comment extensions
-
+      
+      
+//      let start = CACurrentMediaTime()
+      #if true
+      let numCores: Int = ProcessInfo.processInfo.processorCount
+      let frames = gif.frames
+      var encoders: [GIFEncoder] = []
+      for _ in 0..<frames.count {
+        encoders.append(GIFEncoder())
+      }
+      var finishedFrameCount: Int = 0
+      let queue = DispatchQueue(label: "queue")
+      
+      
+      DispatchQueue.concurrentPerform(iterations: numCores) { z in
+        while true {
+          let (encoder, encoderID) = queue.sync { () -> (GIFEncoder?, Int?) in
+            if finishedFrameCount >= frames.count {
+              return (nil, nil)
+            }
+            let output = encoders[finishedFrameCount]
+            let encoderID = finishedFrameCount
+            finishedFrameCount += 1
+            return (output, encoderID)
+          }
+          guard var encoder, let encoderID else {
+            break
+          }
+          
+          encoder.append(frame: frames[encoderID], globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
+          
+          queue.sync {
+            encoders[encoderID] = encoder
+          }
+        }
+      }
+      for encoder in encoders {
+        self.data.append(encoder.data)
+      }
+      
+      #else
         for frame in gif.frames {
             append(frame: frame, globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
         }
+      #endif
+//      let end = CACurrentMediaTime()
+      
+//      print(Int((end - start) * 1e3), "milliseconds")
 
         appendTrailer()
 
