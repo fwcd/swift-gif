@@ -10,6 +10,7 @@ struct BitData {
     public private(set) var bytes: [UInt8]
     private var byteIndex: Int = 0
     private var bitIndexFromRight: UInt = 0 { // ...inside the current byte
+      @inline(__always)
         didSet {
             if bitIndexFromRight >= 8 {
                 byteIndex += 1
@@ -27,16 +28,58 @@ struct BitData {
     /// Writes the rightmost `bitCount` bits from the value.
     public mutating func write(_ value: UInt, bitCount: UInt) {
         // Write bits
-        for i in 0..<bitCount {
-            let bit = (value >> i) & 1
-            bytes[byteIndex] |= UInt8(bit << bitIndexFromRight)
-            bitIndexFromRight += 1
-
-            if bitIndexFromRight == 0 {
-                bytes.append(0)
-            }
+      #if true
+      var remainingBitCount = bitCount
+      var cursor: UInt = 0
+      while remainingBitCount > 0 {
+        if remainingBitsInByte == 8 {
+          let byte = UInt8(truncatingIfNeeded: value &>> cursor)
+          if remainingBitCount >= 8 {
+            bytes[byteIndex] = byte
+            byteIndex += 1
+            bytes.append(0)
+            cursor &+= 8
+            remainingBitCount &-= 8
+          } else {
+            let mask = ~UInt8(truncatingIfNeeded: 255 &<< remainingBitCount)
+            bytes[byteIndex] = byte & mask
+            bitIndexFromRight += remainingBitCount
+            cursor &+= remainingBitCount
+            remainingBitCount &-= remainingBitCount
+          }
+        } else if remainingBitCount >= remainingBitsInByte {
+          let byte = UInt8(truncatingIfNeeded: value &>> cursor)
+          bytes[byteIndex] |= byte &<< bitIndexFromRight
+          bytes.append(0)
+          cursor &+= remainingBitsInByte
+          remainingBitCount &-= remainingBitsInByte
+          bitIndexFromRight += remainingBitsInByte
+        } else {
+          var byte = UInt8(truncatingIfNeeded: value &>> cursor)
+          let mask = ~UInt8(truncatingIfNeeded: 255 &<< remainingBitCount)
+          byte &= mask
+          byte = byte &<< bitIndexFromRight
+          
+          bytes[byteIndex] |= byte
+          bitIndexFromRight += remainingBitCount
+          cursor &+= remainingBitCount
+          remainingBitCount &-= remainingBitCount
         }
-        log.trace("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
+      }
+      precondition(cursor == bitCount, "Corrupted cursor.")
+      
+      #else
+      for i in 0..<bitCount {
+          let bit = (value &>> i) & 1
+          bytes[byteIndex] |= UInt8(truncatingIfNeeded: bit &<< bitIndexFromRight)
+          bitIndexFromRight &+= 1
+
+          if bitIndexFromRight == 0 {
+              bytes.append(0)
+          }
+      }
+      #endif
+      log.trace("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
     }
 
     public mutating func read(bitCount: UInt) -> UInt {

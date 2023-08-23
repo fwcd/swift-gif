@@ -2,6 +2,7 @@ import Foundation
 import Logging
 import CairoGraphics
 import Utils
+import QuartzCore
 
 fileprivate let log = Logger(label: "GIF.GIFEncoder")
 
@@ -174,6 +175,8 @@ struct GIFEncoder {
         height: Int,
         backgroundColorIndex: UInt8
     ) {
+//      let checkpoint0 = CACurrentMediaTime()
+      
         log.debug("Appending image data...")
 
         // Convert the ARGB-encoded image first to color
@@ -183,6 +186,8 @@ struct GIFEncoder {
 
         log.debug("LZW-encoding the image data...")
         encoder.beginEncoding(into: &lzwEncoded)
+      
+//      let checkpoint1 = CACurrentMediaTime()
 
         // Iterate all pixels as ARGB values and encode them
         for y in 0..<height {
@@ -192,6 +197,8 @@ struct GIFEncoder {
         }
 
         encoder.finishEncoding(into: &lzwEncoded)
+      
+//      let checkpoint2 = CACurrentMediaTime()
 
         log.debug("Appending the encoded image data (min code size: \(encoder.minCodeSize))...")
         append(byte: UInt8(encoder.minCodeSize))
@@ -206,10 +213,14 @@ struct GIFEncoder {
                 byteIndex += 1
             }
         }
+      
+//      let checkpoint3 = CACurrentMediaTime()
 
         append(byte: 0x00) // Block terminator
 
         log.debug("Appended image data")
+      
+//      print("\(Int((checkpoint1 - checkpoint0) * 1e6)) - \(Int((checkpoint2 - checkpoint1) * 1e6)) - \(Int((checkpoint3 - checkpoint2) * 1e6))")
     }
 
     /// Appends a frame with the specified quantizer
@@ -220,9 +231,13 @@ struct GIFEncoder {
         sizeOfGlobalColorTable: UInt8,
         backgroundColorIndex: UInt8
     ) {
+      
+      
         let image = frame.image
         let sizeOfColorTable = frame.imageDescriptor.useLocalColorTable ? frame.imageDescriptor.sizeOfLocalColorTable : sizeOfGlobalColorTable
         var actualBackgroundColorIndex = backgroundColorIndex
+      
+      
 
         if let graphicsControlExtension = frame.graphicsControlExtension {
             append(graphicsControlExtension: graphicsControlExtension)
@@ -233,15 +248,22 @@ struct GIFEncoder {
         }
 
         append(imageDescriptor: frame.imageDescriptor)
+      
+      
 
         if let quantization = frame.localQuantization {
             append(colorTable: quantization.colorTable, size: sizeOfColorTable)
         }
 
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
-        appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: actualBackgroundColorIndex)
+      
+      
+      
+      appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: actualBackgroundColorIndex)
 
         log.debug("Appended frame")
+      
+
     }
 
     private mutating func appendTrailer() {

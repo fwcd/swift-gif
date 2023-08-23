@@ -1,4 +1,5 @@
 import CairoGraphics
+import QuartzCore
 
 /// An in-memory, decoded GIF animation, closely
 /// mirroring the internal structure of a GIF.
