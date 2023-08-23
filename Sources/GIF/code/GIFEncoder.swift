@@ -22,17 +22,17 @@ struct GIFEncoder {
         // See http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html for a detailed explanation of the format
         appendHeader()
         append(logicalScreenDescriptor: gif.logicalScreenDescriptor)
-    
+
         if let quantization = gif.globalQuantization {
             append(colorTable: quantization.colorTable, size: gif.logicalScreenDescriptor.sizeOfGlobalColorTable)
         }
-    
+
         for applicationExtension in gif.applicationExtensions {
             append(applicationExtension: applicationExtension)
         }
-    
+
         // TODO: Encode comment extensions
-    
+
         var numCores: Int = ProcessInfo.processInfo.processorCount
         let frames = gif.frames
     
@@ -111,8 +111,8 @@ struct GIFEncoder {
         append(byte: color.red)
         append(byte: color.green)
         append(byte: color.blue)
-    
-    
+    }
+
     private mutating func appendHeader() {
         append(string: "GIF89a")
 
@@ -272,7 +272,7 @@ struct GIFEncoder {
         let image = frame.image
         let sizeOfColorTable = frame.imageDescriptor.useLocalColorTable ? frame.imageDescriptor.sizeOfLocalColorTable : sizeOfGlobalColorTable
         var actualBackgroundColorIndex = backgroundColorIndex
-        
+
         if let graphicsControlExtension = frame.graphicsControlExtension {
             append(graphicsControlExtension: graphicsControlExtension)
             
@@ -281,19 +281,19 @@ struct GIFEncoder {
             }
         }
         append(imageDescriptor: frame.imageDescriptor)
-        
+
         if let quantization = frame.localQuantization {
             append(colorTable: quantization.colorTable, size: sizeOfColorTable)
         }
         guard let quantization = frame.localQuantization ?? globalQuantization else { fatalError("No color quantization specified for GIF frame") }
         appendImageDataAsLZW(image: image, quantization: quantization, width: image.width, height: image.height, backgroundColorIndex: actualBackgroundColorIndex)
-        
+
         log.debug("Appended frame")
     }
-    
+
     private mutating func appendTrailer() {
         append(byte: GIFConstants.trailer)
-        
+
         log.debug("Appended trailer")
     }
 }
