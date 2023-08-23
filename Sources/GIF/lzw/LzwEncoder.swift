@@ -1,7 +1,6 @@
 // Based on http://giflib.sourceforge.net/whatsinagif/lzw_image_data.html
 import Utils
 import Logging
-import QuartzCore
 
 fileprivate let log = Logger(label: "GIF.LzwEncoder")
 fileprivate let maxCodeTableCount: Int = (1 << 12) - 1
