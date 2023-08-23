@@ -1,7 +1,3 @@
-# Multicore GIF Encoder
-
-Faster version of the original GIF encoder for usage in production renders.
-
 # GIF Coder for Swift
 
 [![Build](https://github.com/fwcd/swift-gif/actions/workflows/build.yml/badge.svg)](https://github.com/fwcd/swift-gif/actions/workflows/build.yml)
@@ -23,6 +19,10 @@ for i in 0..<20 {
 // Encode the GIF to a byte buffer
 let data = try gif.encoded()
 ```
+
+## Technical Details
+
+GIF encoding is more computationally intensive than decoding. It can become a bottleneck when GIF is used as a video codec and serialization must happen in real-time. Therefore, multicore CPU is used to accelerate the encoding of animated GIFs. All the animation frames are gathered into one `Array`, which is divided among all CPU cores in the system.
 
 ## System Dependencies
 

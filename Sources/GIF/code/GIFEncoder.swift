@@ -2,14 +2,14 @@ import Foundation
 import Logging
 import CairoGraphics
 import Utils
-import QuartzCore
-import System
 
 fileprivate let log = Logger(label: "GIF.GIFEncoder")
 
 /// Encodes an animated GIF to an in-memory byte buffer.
 struct GIFEncoder {
     public private(set) var data: Data
+  
+    fileprivate static let queue = DispatchQueue(label: "GIF.GIFEncoder.queue")
 
     /// Creates a new GIF with the specified
     /// dimensions. A loop count of 0 means infinite
@@ -35,27 +35,36 @@ struct GIFEncoder {
       
       
 //      let start = CACurrentMediaTime()
-      #if true
-      let numCores: Int = ProcessInfo.processInfo.processorCount
+     
+      var numCores: Int = ProcessInfo.processInfo.processorCount
       let frames = gif.frames
+      
+      numCores = min(numCores, frames.count)
       var encoders: [GIFEncoder] = []
       for _ in 0..<frames.count {
         encoders.append(GIFEncoder())
       }
-      var finishedFrameCount: Int = 0
-      let queue = DispatchQueue(label: "queue")
-      
+      var finishedFrameCount: Int = numCores
       
       DispatchQueue.concurrentPerform(iterations: numCores) { z in
+        var i = z
         while true {
-          let (encoder, encoderID) = queue.sync { () -> (GIFEncoder?, Int?) in
-            if finishedFrameCount >= frames.count {
-              return (nil, nil)
+          let getEncoder = { () -> (GIFEncoder?, Int?) in
+            if i > numCores {
+              if finishedFrameCount >= frames.count {
+                return (nil, nil)
+              }
+              let output = encoders[finishedFrameCount]
+              let encoderID = finishedFrameCount
+              finishedFrameCount += 1
+              return (output, encoderID)
+            } else {
+              return (encoders[i], i)
             }
-            let output = encoders[finishedFrameCount]
-            let encoderID = finishedFrameCount
-            finishedFrameCount += 1
-            return (output, encoderID)
+          }
+          let (encoder, encoderID) = GIFEncoder.queue.sync(execute: getEncoder)
+          defer {
+            i = numCores + 1
           }
           guard var encoder, let encoderID else {
             break
@@ -63,7 +72,7 @@ struct GIFEncoder {
           
           encoder.append(frame: frames[encoderID], globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
           
-          queue.sync {
+          GIFEncoder.queue.sync {
             encoders[encoderID] = encoder
           }
         }
@@ -72,11 +81,6 @@ struct GIFEncoder {
         self.data.append(encoder.data)
       }
       
-      #else
-        for frame in gif.frames {
-            append(frame: frame, globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
-        }
-      #endif
 //      let end = CACurrentMediaTime()
       
 //      print(Int((end - start) * 1e3), "milliseconds")
