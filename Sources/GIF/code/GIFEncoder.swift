@@ -9,7 +9,7 @@ fileprivate let log = Logger(label: "GIF.GIFEncoder")
 struct GIFEncoder {
     public private(set) var data: Data
     
-    fileprivate static let frameEncodingQueue = DispatchQueue(label: "GIF.GIFEncoder.queue")
+    fileprivate static let frameEncodingQueue = DispatchQueue(label: "GIF.GIFEncoder.frameEncodingQueue")
     
     /// Creates a new GIF with the specified
     /// dimensions. A loop count of 0 means infinite
