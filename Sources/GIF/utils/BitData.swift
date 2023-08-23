@@ -10,7 +10,6 @@ struct BitData {
     public private(set) var bytes: [UInt8]
     private var byteIndex: Int = 0
     private var bitIndexFromRight: UInt = 0 { // ...inside the current byte
-      @inline(__always)
         didSet {
             if bitIndexFromRight >= 8 {
                 byteIndex += 1
@@ -66,7 +65,7 @@ struct BitData {
             }
         }
         precondition(cursor == bitCount, "Corrupted cursor.")
-        
+
         log.trace("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
     }
 
