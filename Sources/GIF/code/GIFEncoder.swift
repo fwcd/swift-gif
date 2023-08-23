@@ -44,7 +44,7 @@ struct GIFEncoder {
         }
         var finishedFrameCount: Int = numCores
         
-        DispatchQueue.concurrentPerform(iterations: numCores) { z in
+        let encodeFrames: (Int) -> Void = { z in
             var i = z
             while true {
                 let getEncoder = { () -> (GIFEncoder?, Int?) in
@@ -75,6 +75,12 @@ struct GIFEncoder {
                 }
             }
         }
+        if frames.count <= 1 {
+            encodeFrames(0)
+        } else {
+            DispatchQueue.concurrentPerform(iterations: numCores, execute: encodeFrames)
+        }
+        
         for encoder in encoders {
             self.data.append(encoder.data)
         }
