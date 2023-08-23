@@ -139,15 +139,15 @@ struct GIFEncoder {
     
     private mutating func append(applicationExtension: ApplicationExtension) {
         switch applicationExtension {
-        case .looping(let loopCount):
-            append(byte: GIFConstants.extensionIntroducer)
-            append(byte: GIFConstants.applicationExtension)
-            append(byte: 0x0B) // Block size
-            append(string: "NETSCAPE2.0")
-            append(byte: 0x03) // Block size
-            append(byte: 0x01) // Loop indicator
-            append(short: loopCount)
-            append(byte: 0x00) // Block terminator
+            case .looping(let loopCount):
+                append(byte: GIFConstants.extensionIntroducer)
+                append(byte: GIFConstants.applicationExtension)
+                append(byte: 0x0B) // Block size
+                append(string: "NETSCAPE2.0")
+                append(byte: 0x03) // Block size
+                append(byte: 0x01) // Loop indicator
+                append(short: loopCount)
+                append(byte: 0x00) // Block terminator
         }
         
         log.debug("Appended application extension")
