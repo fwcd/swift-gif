@@ -22,17 +22,11 @@ struct LzwEncoder {
 
     public mutating func encodeAndAppend(index: Int, into data: inout BitData) {
         // The main LZW encoding algorithm
-//      let checkpoint1 = CACurrentMediaTime()
         let extendedBuffer = indexBuffer + [Int32(index)]
-//      let checkpoint2 = CACurrentMediaTime()
         if table.contains(indices: extendedBuffer) {
             indexBuffer = extendedBuffer
-//          let checkpoint3 = CACurrentMediaTime()
-//          print("\(Int((checkpoint2 - checkpoint1) * 1e7)), \(Int((checkpoint3 - checkpoint2) * 1e7))")
         } else {
-//          let checkpoint2 = CACurrentMediaTime()
             write(code: table[indexBuffer]!, into: &data)
-//          let checkpoint3 = CACurrentMediaTime()
             if table.meta.count >= maxCodeTableCount {
                 write(code: table.meta.clearCode, into: &data)
                 table.reset()
@@ -40,8 +34,6 @@ struct LzwEncoder {
                 table.append(indices: extendedBuffer)
             }
             indexBuffer = [Int32(index)]
-//          let checkpoint4 = CACurrentMediaTime()
-//          print("\(Int((checkpoint2 - checkpoint1) * 1e7)), \(Int((checkpoint3 - checkpoint2) * 1e7)), \(Int((checkpoint4 - checkpoint3) * 1e7))")
         }
     }
 
