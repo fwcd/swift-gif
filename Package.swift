@@ -35,7 +35,7 @@ let package = Package(
                 .product(name: "CairoGraphics", package: "swift-graphics")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "GIFInspector",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
@@ -43,7 +43,7 @@ let package = Package(
                 .target(name: "GIF")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "GIFDemoGenerator",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
