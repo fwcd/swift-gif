@@ -7,8 +7,11 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'macos-13']
-        swift: ['5.7']
+        include:
+        - os: 'ubuntu-20.04'
+          swift: '5.7'
+        - os: 'macos-13'
+          swift: '5.9'
 
     runs-on: ${{ matrix.os }}
     steps:
