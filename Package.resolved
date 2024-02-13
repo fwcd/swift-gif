@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/fwcd/swift-graphics.git",
         "state": {
           "branch": null,
-          "revision": "d57c3f5b4deb36009301ae3628bb2400f466c8e4",
-          "version": "2.1.0"
+          "revision": "9366d11b963d42f5b0ae37bcf95d9dcc185c55ef",
+          "version": "3.0.0"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/fwcd/swift-utils.git",
         "state": {
           "branch": null,
-          "revision": "7101c523c5986cecc3c667662aba66805ea6e7ce",
-          "version": "2.0.0"
+          "revision": "b292686fd4846a7ee97802868aa2f8872c10b0d1",
+          "version": "3.0.0"
         }
       },
       {
