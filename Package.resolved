@@ -1,70 +1,68 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
-        "state": {
-          "branch": null,
-          "revision": "92646c0cdbaca076c8d3d0207891785b3379cbff",
-          "version": "0.3.1"
-        }
-      },
-      {
-        "package": "swift-cairo",
-        "repositoryURL": "https://github.com/fwcd/swift-cairo.git",
-        "state": {
-          "branch": null,
-          "revision": "389ad220eef69e315713ce3f6b23bb5437eb09c3",
-          "version": "1.3.3"
-        }
-      },
-      {
-        "package": "swift-graphics",
-        "repositoryURL": "https://github.com/fwcd/swift-graphics.git",
-        "state": {
-          "branch": null,
-          "revision": "9366d11b963d42f5b0ae37bcf95d9dcc185c55ef",
-          "version": "3.0.0"
-        }
-      },
-      {
-        "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log.git",
-        "state": {
-          "branch": null,
-          "revision": "173f567a2dfec11d74588eea82cecea555bdc0bc",
-          "version": "1.4.0"
-        }
-      },
-      {
-        "package": "swift-utils",
-        "repositoryURL": "https://github.com/fwcd/swift-utils.git",
-        "state": {
-          "branch": null,
-          "revision": "b292686fd4846a7ee97802868aa2f8872c10b0d1",
-          "version": "3.0.0"
-        }
-      },
-      {
-        "package": "SwiftSoup",
-        "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
-        "state": {
-          "branch": null,
-          "revision": "774dc9c7213085db8aa59595e27c1cd22e428904",
-          "version": "2.3.2"
-        }
-      },
-      {
-        "package": "XMLCoder",
-        "repositoryURL": "https://github.com/MaxDesiatov/XMLCoder.git",
-        "state": {
-          "branch": null,
-          "revision": "c438dad94f6a243b411b70a4b4bac54595064808",
-          "version": "0.15.0"
-        }
+  "pins" : [
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "9564d61b08a5335ae0a36f789a7d71493eacadfc",
+        "version" : "0.3.2"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "swift-cairo",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fwcd/swift-cairo.git",
+      "state" : {
+        "revision" : "9654454540ed412249259f310aa8b658b4359bc2",
+        "version" : "1.3.4"
+      }
+    },
+    {
+      "identity" : "swift-graphics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fwcd/swift-graphics.git",
+      "state" : {
+        "revision" : "4106061133bca2f38b398e5ce207e8d6b73adb43",
+        "version" : "3.0.1"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
+        "version" : "1.5.4"
+      }
+    },
+    {
+      "identity" : "swift-utils",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fwcd/swift-utils.git",
+      "state" : {
+        "revision" : "b292686fd4846a7ee97802868aa2f8872c10b0d1",
+        "version" : "3.0.0"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "f83c097597094a04124eb6e0d1e894d24129af87",
+        "version" : "2.7.0"
+      }
+    },
+    {
+      "identity" : "xmlcoder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MaxDesiatov/XMLCoder.git",
+      "state" : {
+        "revision" : "b1e944cbd0ef33787b13f639a5418d55b3bed501",
+        "version" : "0.17.1"
+      }
+    }
+  ],
+  "version" : 2
 }
