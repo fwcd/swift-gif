@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "swift-argument-parser",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-argument-parser.git",
-      "state" : {
-        "revision" : "9564d61b08a5335ae0a36f789a7d71493eacadfc",
-        "version" : "0.3.2"
-      }
-    },
-    {
       "identity" : "swift-cairo",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fwcd/swift-cairo.git",
