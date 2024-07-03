@@ -1,6 +1,7 @@
 # GIF Coder for Swift
 
 [![Build](https://github.com/fwcd/swift-gif/actions/workflows/build.yml/badge.svg)](https://github.com/fwcd/swift-gif/actions/workflows/build.yml)
+[![Docs](https://github.com/fwcd/swift-gif/actions/workflows/docs.yml/badge.svg)](https://fwcd.github.io/swift-gif/documentation/gif)
 
 A lightweight LZW encoder and decoder for animated GIFs written in pure Swift, thus running on any platform, including Linux.
 
