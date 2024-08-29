@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fwcd/swift-graphics.git",
       "state" : {
-        "revision" : "4106061133bca2f38b398e5ce207e8d6b73adb43",
-        "version" : "3.0.1"
+        "revision" : "bb63a812bc5410af7f07cdc636371d55cc3e2aeb",
+        "version" : "4.0.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fwcd/swift-utils.git",
       "state" : {
-        "revision" : "b292686fd4846a7ee97802868aa2f8872c10b0d1",
-        "version" : "3.0.0"
+        "revision" : "12e4cb20ae4c4d4339c670bbf4ab72e8c3981fcc",
+        "version" : "4.0.0"
       }
     },
     {
