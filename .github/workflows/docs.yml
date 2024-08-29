@@ -26,7 +26,8 @@ jobs:
     - name: Set up Pages
       uses: actions/configure-pages@v3
     - name: Set up Swift
-      uses: swift-actions/setup-swift@v2
+    # https://github.com/swift-actions/setup-swift/pull/680
+      uses: swift-actions/setup-swift@bb83339d1e8577741bdc6c65ba551ce7dc0fb854
       with:
         swift-version: '5.7'
     - name: Generate Docs
