@@ -27,15 +27,45 @@ struct BitData {
     /// Writes the rightmost `bitCount` bits from the value.
     public mutating func write(_ value: UInt, bitCount: UInt) {
         // Write bits
-        for i in 0..<bitCount {
-            let bit = (value >> i) & 1
-            bytes[byteIndex] |= UInt8(bit << bitIndexFromRight)
-            bitIndexFromRight += 1
-
-            if bitIndexFromRight == 0 {
+        var remainingBitCount = bitCount
+        var cursor: UInt = 0
+        while remainingBitCount > 0 {
+            if remainingBitsInByte == 8 {
+                let byte = UInt8(truncatingIfNeeded: value &>> cursor)
+                if remainingBitCount >= 8 {
+                    bytes[byteIndex] = byte
+                    byteIndex += 1
+                    bytes.append(0)
+                    cursor &+= 8
+                    remainingBitCount &-= 8
+                } else {
+                    let mask = ~UInt8(truncatingIfNeeded: 255 &<< remainingBitCount)
+                    bytes[byteIndex] = byte & mask
+                    bitIndexFromRight += remainingBitCount
+                    cursor &+= remainingBitCount
+                    remainingBitCount &-= remainingBitCount
+                }
+            } else if remainingBitCount >= remainingBitsInByte {
+                let byte = UInt8(truncatingIfNeeded: value &>> cursor)
+                bytes[byteIndex] |= byte &<< bitIndexFromRight
                 bytes.append(0)
+                cursor &+= remainingBitsInByte
+                remainingBitCount &-= remainingBitsInByte
+                bitIndexFromRight += remainingBitsInByte
+            } else {
+                var byte = UInt8(truncatingIfNeeded: value &>> cursor)
+                let mask = ~UInt8(truncatingIfNeeded: 255 &<< remainingBitCount)
+                byte &= mask
+                byte = byte &<< bitIndexFromRight
+
+                bytes[byteIndex] |= byte
+                bitIndexFromRight += remainingBitCount
+                cursor &+= remainingBitCount
+                remainingBitCount &-= remainingBitCount
             }
         }
+        precondition(cursor == bitCount, "Corrupted cursor.")
+
         log.trace("Wrote \(value & ((1 << bitCount) - 1)) of width \(bitCount)")
     }
 

@@ -16,7 +16,7 @@ struct LzwEncoderTable: CustomStringConvertible {
     public subscript(indices: IndexArray) -> Int? {
         if indices.count == 1 {
             // A single index matches its color code
-            return indices.first
+            return Int(indices.first!)
         } else {
             return entries[indices]
         }

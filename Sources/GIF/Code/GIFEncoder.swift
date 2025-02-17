@@ -9,6 +9,8 @@ fileprivate let log = Logger(label: "GIF.GIFEncoder")
 struct GIFEncoder {
     public private(set) var data: Data
 
+    private static let frameEncodingQueue = DispatchQueue(label: "GIF.GIFEncoder.frameEncodingQueue")
+
     /// Creates a new GIF with the specified
     /// dimensions. A loop count of 0 means infinite
     /// loops.
@@ -31,8 +33,55 @@ struct GIFEncoder {
 
         // TODO: Encode comment extensions
 
-        for frame in gif.frames {
-            append(frame: frame, globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
+        var numCores: Int = ProcessInfo.processInfo.processorCount
+        let frames = gif.frames
+    
+        numCores = min(numCores, frames.count)
+        var encoders: [GIFEncoder] = []
+        for _ in 0..<frames.count {
+            encoders.append(GIFEncoder())
+        }
+        var finishedFrameCount: Int = numCores
+    
+        let encodeFrames: (Int) -> Void = { z in
+            var i = z
+            while true {
+                let getEncoder = { () -> (GIFEncoder?, Int?) in
+                    if i > numCores {
+                        if finishedFrameCount >= frames.count {
+                            return (nil, nil)
+                        }
+                        let output = encoders[finishedFrameCount]
+                        let encoderID = finishedFrameCount
+                        finishedFrameCount += 1
+                        return (output, encoderID)
+                    } else {
+                        return (encoders[i], i)
+                    }
+                }
+                let (encoder, encoderID) = GIFEncoder.frameEncodingQueue.sync(execute: getEncoder)
+                defer {
+                    i = numCores + 1
+                }
+                guard var encoder, let encoderID else {
+                    break
+                }
+
+                encoder.append(frame: frames[encoderID], globalQuantization: gif.globalQuantization, sizeOfGlobalColorTable: gif.logicalScreenDescriptor.sizeOfGlobalColorTable, backgroundColorIndex: gif.logicalScreenDescriptor.backgroundColorIndex)
+
+                GIFEncoder.frameEncodingQueue.sync {
+                    encoders[encoderID] = encoder
+                }
+            }
+        }
+        if frames.count <= 1 {
+            encodeFrames(0)
+        } else {
+            DispatchQueue.concurrentPerform(iterations: numCores, execute: encodeFrames)
+        }
+
+        for encoder in encoders {
+            self.data.append(encoder.data)
         }
 
         appendTrailer()

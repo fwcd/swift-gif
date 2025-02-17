@@ -21,6 +21,10 @@ for i in 0..<20 {
 let data = try gif.encoded()
 ```
 
+## Technical Details
+
+GIF encoding is more computationally intensive than decoding. It can become a bottleneck when GIF is used as a video codec and serialization must happen in real-time. Therefore, multicore CPU is used to accelerate the encoding of animated GIFs. All the animation frames are gathered into one `Array`, which is then divided among all CPU cores in the system.
+
 ## System Dependencies
 
 * Swift 5.10+
