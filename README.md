@@ -23,5 +23,5 @@ let data = try gif.encoded()
 
 ## System Dependencies
 
-* Swift 5.9+
+* Swift 5.10+
 * Cairo, see [swift-graphics](https://github.com/fwcd/swift-graphics)
