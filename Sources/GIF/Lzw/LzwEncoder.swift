@@ -7,7 +7,7 @@ fileprivate let maxCodeTableCount: Int = (1 << 12) - 1
 
 struct LzwEncoder {
     private(set) var table: LzwEncoderTable
-    private var indexBuffer: [Int] = []
+    private var indexBuffer: IndexArray = .init()
 
     public var minCodeSize: Int { table.meta.minCodeSize }
 
@@ -21,7 +21,8 @@ struct LzwEncoder {
 
     public mutating func encodeAndAppend(index: Int, into data: inout BitData) {
         // The main LZW encoding algorithm
-        let extendedBuffer = indexBuffer + [index]
+        var extendedBuffer = indexBuffer
+        extendedBuffer.append(index)
         if table.contains(indices: extendedBuffer) {
             indexBuffer = extendedBuffer
         } else {
@@ -32,7 +33,7 @@ struct LzwEncoder {
             } else {
                 table.append(indices: extendedBuffer)
             }
-            indexBuffer = [index]
+            indexBuffer = .init(index)
         }
     }
 

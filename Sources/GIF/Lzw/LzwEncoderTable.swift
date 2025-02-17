@@ -5,7 +5,7 @@ fileprivate let log = Logger(label: "GIF.LzwEncoderTable")
 
 struct LzwEncoderTable: CustomStringConvertible {
     // Stores the mapping from multiple indices to a single code
-    private var entries: [[Int]: Int] = [:]
+    private var entries: [IndexArray: Int] = [:]
     public var meta: LzwTableMeta
     public var description: String { "\(entries)" }
 
@@ -13,7 +13,7 @@ struct LzwEncoderTable: CustomStringConvertible {
         meta = LzwTableMeta(colorCount: colorCount)
     }
 
-    public subscript(indices: [Int]) -> Int? {
+    public subscript(indices: IndexArray) -> Int? {
         if indices.count == 1 {
             // A single index matches its color code
             return indices.first
@@ -22,7 +22,7 @@ struct LzwEncoderTable: CustomStringConvertible {
         }
     }
 
-    public mutating func append(indices: [Int]) {
+    public mutating func append(indices: IndexArray) {
         assert(indices.count > 1)
         entries[indices] = meta.count
         log.trace("Added \(meta.count)")
@@ -30,7 +30,7 @@ struct LzwEncoderTable: CustomStringConvertible {
         meta.updateCodeSize(offset: 1)
     }
 
-    public func contains(indices: [Int]) -> Bool {
+    public func contains(indices: IndexArray) -> Bool {
         return self[indices] != nil
     }
 

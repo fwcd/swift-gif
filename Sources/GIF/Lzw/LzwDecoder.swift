@@ -42,14 +42,17 @@ struct LzwDecoder {
                 log.trace("Found code: k = \(k) from \(indices) @ codeSize \(table.meta.codeSize)")
                 if let lastCode = lastCode {
                     guard let lastIndices = table[lastCode] else { throw LzwCodingError.tableTooSmall }
-                    table.append(indices: lastIndices + [k])
+                    var nextIndices = lastIndices
+                    nextIndices.append(k)
+                    table.append(indices: nextIndices)
                 }
             } else {
                 guard let lastCode = lastCode else { throw LzwCodingError.noLastCode }
                 guard let lastIndices = table[lastCode] else { throw LzwCodingError.tableTooSmall }
                 guard let k = lastIndices.first else { throw LzwCodingError.decodedIndicesEmpty }
                 log.trace("Did not found code: k = \(k)")
-                let nextIndices = lastIndices + [k]
+                var nextIndices = lastIndices
+                nextIndices.append(k)
                 decoded.append(contentsOf: nextIndices)
                 table.append(indices: nextIndices)
             }
